@@ -1,9 +1,7 @@
 # TODO – ha-dashboard-kit
 
-Otevřené věci a kandidáti na přesun z karet do kitu. Hotové se mažou, čísla se nepoužívají znovu.
+Jen to, co čeká na vaši odpověď: sjednocení karet Klima a Energie, které si žádá změnu chování nebo vzhledu. Hotové se mažou, čísla se nepoužívají znovu; kandidáty bez vaší žádosti (pomocná funkce pro test češtiny v cizích jazycích, společné soubory pokynů agentů) kit nevede, jsou v historii gitu.
 
-- **K1. Posuvník Klima.** Klima má vlastní posuvník (časovač, cíl teploty) v hlavním souboru a ve stylech. `HdkSlider` je ekvivalent podle HIG; sjednotit vzhled a přepnout Klima na něj (bez změny chování, testy Klima musí zůstat zelené).
-- **K2. Nápověda u předvoleb žaluzií v Klimatu.** Gesto (`HoldOrDoubleTap`) už Klima z kitu používá; zbývá zvážit, zda i nápověda u tlačítka (`.preset-hint`) nemá používat `HintState` a `hintStyles`.
-- **K3. Barvy a povrchy podle HIG.** Obě karty mají tmavou a světlou sadu povrchů (`--ed-*`, `--kd-*`) se stejnými hodnotami Apple HIG. Společná sada `--hdk-*` s mapováním karet by odstranila kopie; rozhodnout, zda jsou hodnoty opravdu totožné.
-- **K4. Souhrnný test stylu textů.** Kontrola „v en a sv není český text“ je zkopírovaná v testech obou karet; nabídnout ji jako pomocnou funkci `testing/` (potřebuje, aby karta řekla, kde je její text).
-- **K5. Soubory pro pokyny agentů.** Pokyny (`.github/copilot-instructions.md`) obou karet se opakují v částech o konfiguraci, jazycích a ověřování; společné části by měly žít jen v kitu a v kartách zůstat odkaz.
+- **K1. Posuvník Klima.** Klima má vlastní posuvník (časovač Topení, cíl teploty) v hlavním souboru a ve stylech; `HdkSlider` je jeho ekvivalent podle HIG. Úkol: přepnout Klima na `HdkSlider` beze změny chování (testy Klima musí zůstat zelené), čímž zmizí druhá kopie.
+- **K2. Nápověda u chráněných ovladačů.** Energie ukazuje nápovědu jako bublinu nad ovladačem se vychýlením ovladače (`HintState`, `hintStyles`). Klima ukazuje u předvoleb žaluzií nápovědu jako řádek pod tlačítkem (`.preset-hint`) a stejným řádkem hlásí i chybu odeslání. Rozhodnout: přepnout Klima na bublinu (chyba odeslání zůstane řádkem), nebo nechat rozdílné.
+- **K3. Barvy a povrchy podle HIG.** Obě karty mají tmavou a světlou sadu povrchů (`--ed-*` v Energii, `--kd-*` v Klimatu). Shodují se karta `#1C1C1E` / `#FFFFFF`, bublina `#3A3A3C` a barva „bez dat“ `#8E8E93` (světlá `#6E6E73`); liší se jen vedlejší text (tmavý `#98989F` × `#9A9AA0`, světlý `#5F5F66` × `#6C6C70`). Návrh: společná sada `--hdk-*` pro tyto povrchy s mapováním karet; potvrdit, že se vedlejší text sjednotí na jednu hodnotu.
