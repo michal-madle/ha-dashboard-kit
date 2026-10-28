@@ -23,7 +23,7 @@ Společné stavební kameny Lovelace karet pro Home Assistant, které dělám: [
 ```jsonc
 // package.json karty
 "dependencies": {
-  "ha-dashboard-kit": "github:michal-madle/ha-dashboard-kit#v0.1.0",
+  "ha-dashboard-kit": "git+https://github.com/michal-madle/ha-dashboard-kit.git#<commit>",
   "lit": "^3.3.1"
 }
 ```
@@ -69,8 +69,8 @@ Testy karty: `tests/server.mjs` volá `startServer`, `playwright.config.ts` vol�
 
 1. Změna v kitu, test, úprava [CURRENT_SPEC.md](./CURRENT_SPEC.md) a tohoto README (společné pravidlo patří sem, ne do karty).
 2. `npm test` (typy, jednotkové testy, testy ovládacích prvků v prohlížeči).
-3. Commit, značka `vX.Y.Z`, push.
-4. V každé kartě `npm install github:michal-madle/ha-dashboard-kit#vX.Y.Z`, `npm test`, commit. Zpětně nekompatibilní změna zvyšuje MAJOR a obě karty se přepíšou v témže kole.
+3. Commit a push na `main`.
+4. V každé kartě `npm install git+https://github.com/michal-madle/ha-dashboard-kit.git#<commit>`, kontrola `resolved` v `package-lock.json` (`git+https`), `npm test`, commit. Zpětně nekompatibilní změna zvyšuje MAJOR a obě karty se přepíšou v témže kole.
 
 Kit se nikdy neupravuje v `node_modules` karty.
 

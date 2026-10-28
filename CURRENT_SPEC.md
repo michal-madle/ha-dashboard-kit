@@ -36,12 +36,13 @@ Testovací stránka (`tests/harness.html`), scénáře a test samotné karty zů
 
 ## Použití v kartě
 
-- Závislost: `"ha-dashboard-kit": "github:michal-madle/ha-dashboard-kit#v0.1.0"` v `package.json` karty. Vždy konkrétní značka (tag), nikdy větev: build karty musí být opakovatelný. `package-lock.json` pevně drží commit.
+- Závislost: `"ha-dashboard-kit": "git+https://github.com/michal-madle/ha-dashboard-kit.git#<commit>"` v `package.json` karty. Vždy konkrétní commit (nebo značka `vX.Y.Z`, až ji uživatel na GitHubu vytvoří; relace Claude značky pushnout nemůže), nikdy větev: build karty musí být opakovatelný. Adresa je `git+https`, ne `github:` (zápis do `package-lock.json` je pak `https`, ne `ssh`; po `npm install` zkontrolovat, že `resolved` je `git+https://…`).
 - `tsconfig.json` karty: `"extends": "ha-dashboard-kit/tsconfig.base.json"` a vlastní `include`.
 - `vite.config.ts` karty: `import { cardBuild } from "ha-dashboard-kit/build/vite.mjs"`, `export default defineConfig(cardBuild("ha-<karta>-dashboard"))`.
 - Karta si své texty drží v `src/translations/` a obalí `getI18n` tak, aby zbytek karty nemusel znát slovníky (`src/i18n.ts` karty: `type Texts = typeof cs`, `const TEXTS: Dictionaries<Texts> = { cs, en, sv }`).
 - Ovládací prvky se registrují s předponou karty: `defineControls("ed")` (Energie), `defineControls("kd")` (Klima). Dvě karty na jedné stránce tak nesdílejí prvek ani jeho verzi.
-- Kit se v kartě neupravuje (ani v `node_modules`). Chyba nebo nová vlastnost se řeší v kitu: změna, test, značka, aktualizace obou karet (oddíl Verze).
+- Kit se v kartě neupravuje (ani v `node_modules`). Chyba nebo nová vlastnost se řeší v kitu: změna, test, commit, aktualizace obou karet (oddíl Verze).
+- Technická pravidla, na která se narazilo: (1) Vite v kartě nečte `tsconfig.json` pro TypeScript v `node_modules`, proto `cardBuild` předává esbuildu `experimentalDecorators`; bez toho se `@property` v ovládacích prvcích přeloží špatně a karta se nevykreslí. (2) Playwright nepřekládá `node_modules`: specifikace v kartě nesmí importovat zdroje karty, které používají TypeScript z kitu (testy čtou jen čistá data jako slovníky a schéma konfigurace); testovací pomocníky kitu jsou proto prosté `.mjs` s ručními `.d.mts`. (3) `npm` bere z gitové závislosti jen soubory z `files` v `package.json` kitu; nový adresář, který karta potřebuje, se musí do `files` přidat.
 
 ## Jazyky
 
@@ -92,7 +93,7 @@ Platí pro každou kartu i každý prvek kitu: iPhone 14 Pro 393 × 852 na výš
 
 ## Verze a vydávání
 
-- Verze kitu je značka `vMAJOR.MINOR.PATCH` v gitu a `version` v `package.json`. Karty drží konkrétní značku.
-- Postup změny kitu: (1) změna zdroje a testů, `npm test` zelený, (2) úprava tohoto dokumentu a `README.md`, (3) commit, značka, push, (4) v každé kartě `npm install github:michal-madle/ha-dashboard-kit#vX.Y.Z`, `npm test` karty, commit se zmínkou verze.
+- Verze kitu je `version` v `package.json` (a značka `vMAJOR.MINOR.PATCH`, až ji uživatel vytvoří). Karty drží konkrétní commit nebo značku, nikdy větev.
+- Postup změny kitu: (1) změna zdroje a testů, `npm test` zelený, (2) úprava tohoto dokumentu a `README.md`, (3) commit a push na `main`, (4) v každé kartě `npm install git+https://github.com/michal-madle/ha-dashboard-kit.git#<commit>`, kontrola `resolved` v `package-lock.json`, `npm test` karty, commit se zmínkou commitu kitu. Změna jen dokumentace kitu nepotřebuje aktualizaci karet.
 - Zpětně nekompatibilní změna (přejmenování události, vlastnosti, proměnné, exportu) zvyšuje MAJOR a obě karty se přepíšou v témže kole; do té doby karty drží starou značku. Nová volitelná vlastnost nebo export zvyšuje MINOR, oprava PATCH.
 - Kit je veřejný (karty ho stahují bez tokenu). Nikdy v něm nejsou osobní údaje z Home Assistantu (GPS, sériová čísla, MAC adresy, přihlašovací údaje).
