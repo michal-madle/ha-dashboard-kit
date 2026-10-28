@@ -4,6 +4,9 @@
 /** @param {string} name file name of the card without ".js", e.g. "ha-energie-dashboard" */
 export function cardBuild(name) {
   return {
+    // Vite does not read a tsconfig for TypeScript under node_modules, so the kit's Lit decorators
+    // (`@property`) would be compiled as standard decorators; the cards use the experimental ones.
+    esbuild: { tsconfigRaw: { compilerOptions: { experimentalDecorators: true, useDefineForClassFields: false, target: "ES2022" } } },
     build: {
       lib: { entry: "src/index.ts", formats: ["es"], fileName: name },
       outDir: "dist",
