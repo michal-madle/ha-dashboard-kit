@@ -38,6 +38,8 @@ describe("texty a formáty", () => {
     expect(getI18n(TEXTS, "cs").one(1.25)).toBe("1,3");
     expect(getI18n(TEXTS, "sv").one(21.3)).toBe("21,3");
     expect(getI18n(TEXTS, "en").one(21.3)).toBe("21.3");
+    expect(getI18n(TEXTS, "cs").two(1.2)).toBe("1,20");
+    expect(getI18n(TEXTS, "en").two(1.234)).toBe("1.23");
     expect(getI18n(TEXTS, "en").half(21.7)).toBe("21.5");
   });
 

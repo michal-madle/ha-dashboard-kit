@@ -19,6 +19,8 @@ export interface I18n<T> {
   t: T;
   /** One decimal place: "21,3" / "21.3". */
   one(value: number): string;
+  /** Two decimal places: "1,25" / "1.25". */
+  two(value: number): string;
   /** Rounded to halves: "21,5", "22". */
   half(value: number): string;
   /** Up to one decimal place, not rounded to halves (axis labels). */
@@ -141,6 +143,7 @@ function createI18n<T>(t: T, language: Language, requested: string, numberFormat
         : (NUMBER_LOCALES[numberFormat] ?? locale);
   const grouping = numberFormat === "none" ? { useGrouping: false } : {};
   const one = new Intl.NumberFormat(numberLocale, { minimumFractionDigits: 1, maximumFractionDigits: 1, ...grouping });
+  const two = new Intl.NumberFormat(numberLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2, ...grouping });
   const upToOne = new Intl.NumberFormat(numberLocale, { maximumFractionDigits: 1, ...grouping });
   const whole = new Intl.NumberFormat(numberLocale, { maximumFractionDigits: 0, ...grouping });
 
@@ -173,6 +176,7 @@ function createI18n<T>(t: T, language: Language, requested: string, numberFormat
     locale,
     t,
     one: (value) => one.format(value),
+    two: (value) => two.format(value),
     half: (value) => upToOne.format(Math.round(value * 2) / 2),
     tick: (value) => upToOne.format(value),
     whole: (value) => whole.format(value),
