@@ -120,7 +120,7 @@ Rozhodnutí uživatele 3. 11. 2026. Záměr: „Ráno nebo večer chci otevřít
 - Přijde-li za běhu režimu u otevřeného okna automatické zavírání žaluzií (večerní), žaluzie sjede, ale lamely zůstanou otevřené. Po zavření okna nebo konci režimu se nastaví na stav, který určil plánovač žaluzií. Uživatel: „night by měl zavřít žaluzie, ale při ventilation_mode jen přenastaví „predchozí stav" na zavřeno“.
 
 **Konec režimu.** Režim končí, jakmile nastane první z těchto věcí:
-- uplynulo 15 min od zapnutí (jedna hodnota; 15 min uživatel vyzkoušel při venkovních 5–10 °C),
+- uplynulo 30 min od zapnutí (jedna hodnota; uživatel 4. 11. 2026: „30 min.“; dřív 15 min, vyzkoušeno při venkovních 5–10 °C),
 - long push nebo vypnutý stojanový ventilátor,
 - zavřelo se poslední otevřené okno („Režim končí IHNED po zavření posledního okna“),
 - do 2 min od zapnutí se neotevřelo žádné okno,
@@ -128,4 +128,6 @@ Rozhodnutí uživatele 3. 11. 2026. Záměr: „Ráno nebo večer chci otevřít
 
 Po restartu Home Assistantu se zapnutý režim vypne („skrze eventu/automatizaci na vypnutí modu“) a proběhne stejné vypnutí jako jindy.
 
-**Nedělá.** Žádný automatický start ani konec podle CO₂, žádné nové notifikace a karta režim nezapíná.
+**Po doběhnutí časovače** se větráky vypnou, lamely se vrátí hned (žádná lhůta) a přijde push na telefon uživatele, ať zavře okna (uživatel 4. 11. 2026: „zaluzie se obnovi / zavrou hned po skonceni rezimu, nezakladej novou lhutu 5min“; „Zavri a pošli notifikaci že zavrit okna - kdyz je zavru rucne nebo long pushem, tak neposilat push“). Ruční konec, long push, zavření posledního okna a vypnutý ventilátor push neposílají.
+
+**Nedělá.** Žádný automatický start ani konec podle CO₂, žádné další notifikace než ta po doběhnutí časovače a karta režim nezapíná.

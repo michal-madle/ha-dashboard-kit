@@ -57,6 +57,12 @@ Jen archiv. Nic z tohoto dokumentu není závazné; platí `CURRENT_SPEC.md`, `A
 - Změněno: pravidlo 11 (týdenní ladění je v `ha-config`), `check-docs.mjs` čte exporty z `ha-config/<karta>/entity/`, agenti (cesty k exportům), `AGENTS.md` (spuštění session se čtyřmi repozitáři, oddíl Soukromý repozitář ha-config).
 - Ověřeno: `check-docs` na kitu, Klimatu a Energii (bez chyb; se špatnou cestou k `ha-config` hlásí chyby), `python3 klima/hodiny/test_export_hodiny.py`, `tyden_data.py` na kopii dat, byte-shoda přesunutých exportů. Kód karet se nezměnil, jejich `npm test` se nespouštěl. `export_hodiny.py` Energie jen zkompilován, proti Home Assistantu nespuštěn.
 
+## 2026-11-04 · Větrací režim: 30 min, lamely hned, push po doběhnutí časovače (potvrzeno)
+
+- Uživatel 4. 11. 2026: „30 min.“ (délka režimu); po návrhu lhůty 5 min pro lamely: „zaluzie se obnovi / zavrou hned po skonceni rezimu, nezakladej novou lhutu 5min. asi jsem to predtim spatne pochopil. Nechtel jsem aby zustaly vecer otevrene. Zavri a posli notofikaci ze zavrit okna - kdyz je zavru rucne nebo long pushem, tak neposilat push“.
+- Zapsáno: `CURRENT_SPEC.md`, oddíl Home Assistantu: větrací režim (30 min, push po doběhnutí časovače, bez lhůty). Zamítnuto: lhůta 5 min po konci režimu pro lamely (nezavedena). Nahrazeno: „žádné nové notifikace“ (3. 11.) výjimkou pro push po doběhnutí časovače.
+- Konfigurace Home Assistantu je v soukromém `ha-config`, `yaml/` (časovač `00:30:00`, automatizace „Ventilation mode - konec časovače“ s notifikací); v Home Assistantu se aktualizuje ručně. Zobrazení v kartě Klima: `DESIGN_HISTORY.md` Klimatu, záznam z 4. 11.
+
 ## 2026-11-03 · Větrací režim v Home Assistantu: chování (potvrzeno)
 
 - Uživatel 3. 11. 2026: „Ráno nebo večer chci otevřít okna, zapnout větráky a vyvětrat. Pak zavřít okna a vypnout větráky.“ Chce jasná a jednoduchá pravidla, nic překombinovaného, žádné obtěžování.
