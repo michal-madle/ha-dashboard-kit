@@ -9,7 +9,7 @@ Jen archiv. Nic z tohoto dokumentu není závazné; platí `CURRENT_SPEC.md`, `A
 - Ověřeno: `snapshot.py` běží proti skutečnému Home Assistantu (1815 entit, 42 integrací, 11 oblastí, štítky Energy, Heating, Climate, Appliances, Mobility, Ventilation a další).
 - Mapy entit přeodvozeny proti obrazu: všechna ID v mapách Energie i Klimatu v obrazu jsou a žádné z nich není zakázané. Opraveno: zásobník Energie je `water_heater.technicka_mistnost_tado_ce_tepla_voda` (doplněno do mapy a do příkladu karty, testy přejmenovány; staré entity integrace `tado` jsou v obrazu zakázané); v mapě Klimatu je automatizace pro Ložnici `automation.loznice_obnova_topeni_pri_zavrenem_okne_loznice` (dřív bez předpony `loznice_`). Mapy dál uvádějí jen entity, které karta používá nebo které spec výslovně zmiňuje; ostatní aktivní entity se štítky karty (Energie 294, Klima 378) v mapách nejsou.
 - Ověřeno: `npm ci` a `npm test` v kopiích karet s novým pinem kitu: Energie 43 testů, Klima 31 testů prošlo; `check-docs` bez chyb ve všech třech repozitářích.
-- Nepotvrzeno, otázka položena D. M.: rozsah pravidla 12 (ID entit ve spec a příkladech karet, jména místností v Klimatu); uživatel odpověděl, že pravidlo 12 nezná, otázka byla přeformulována.
+- Potvrzeno uživatelem po vysvětlení pravidla 12: „sensor.goodwe_pv_power je ok veřejný, jména místností nevadí“. ID entit a jména místností zůstávají v kartách, ve spec, v příkladech i v testech; zapsáno do `AGENTS.md`, pravidlo 12. Token zrušen („token zrušen“). Značka kitu se nevytváří: „neplánuju další force push“, piny karet zůstávají na commitu `79c0d62…` (je v historii `main`).
 
 ## 2026-11-04 · `ha-config` jako obraz Home Assistantu, jeden zdroj entit, zjednodušení, vazby kit–karty (potvrzeno uživatelem)
 
