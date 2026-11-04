@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ha-dashboard-kit – controls</title>
+  <style>
+    html, body { margin: 0; background: #1c1c1e; color: #fff; font-family: -apple-system, "SF Pro Text", Roboto, sans-serif; }
+    main { display: grid; gap: 28px; padding: 60px 16px 16px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    /* The tokens a card maps from its own colours (README.md, Ovládací prvky). */
+    :root {
+      --hdk-accent: #0a84ff;
+      --hdk-switch-off: rgb(120 120 128 / 36%);
+      --hdk-track: #2c2c2e;
+      --hdk-track-compact: #3a3a3c;
+      --hdk-bar: rgb(255 255 255 / 14%);
+      --hdk-tick: rgb(255 255 255 / 28%);
+      --hdk-secondary: #98989f;
+      --hdk-seg-thumb: #ffffff;
+      --hdk-seg-text: #ebebf5;
+      --hdk-seg-selected: #000000;
+      --hdk-bubble: #3a3a3c;
+      --hdk-bubble-text: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 style="position:absolute;top:8px;left:16px;margin:0;font-size:17px">Controls</h1>
+    <div class="row"><span>Plain switch</span><kit-switch id="plain" label="Plain switch"></kit-switch></div>
+    <div class="row"><span>Guarded switch</span><kit-switch id="guarded" label="Guarded switch" guarded hint="Hold or tap twice."></kit-switch></div>
+    <kit-segmented id="seg" label="Mode" guarded value="a" hint="Hold, drag or tap twice."></kit-segmented>
+    <kit-segmented id="free" label="Free mode" value="a"></kit-segmented>
+    <kit-slider id="slider" label="Temperature" min="30" max="70" step="1" value="50" minLabel="30" maxLabel="70"></kit-slider>
+  </main>
+  <script type="module">
+    import { defineControls } from "/src/controls/index.ts";
+    defineControls("kit");
+    defineControls("kit");
+    const options = [{ value: "a", label: "Surplus" }, { value: "b", label: "Boost" }];
+    for (const id of ["seg", "free"]) document.getElementById(id).options = options;
+    window.events = [];
+    for (const type of ["hdk-toggle", "hdk-select", "hdk-change", "hdk-input"]) {
+      document.addEventListener(type, (event) => window.events.push({ type, id: event.target.id, detail: event.detail }));
+    }
+    window.ready = true;
+  </script>
+</body>
+</html>

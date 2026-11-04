@@ -1,0 +1,47 @@
+{
+  "name": "ha-dashboard-kit",
+  "version": "0.1.0",
+  "description": "Shared building blocks of the Home Assistant Lovelace cards of Michal Madle (Klima, Energie)",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./types": "./src/types.ts",
+    "./i18n": "./src/i18n.ts",
+    "./entities": "./src/entities.ts",
+    "./config": "./src/config.ts",
+    "./gesture": "./src/gesture.ts",
+    "./controls": "./src/controls/index.ts",
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./build/vite.mjs": { "types": "./build/vite.d.mts", "default": "./build/vite.mjs" },
+    "./build/copy-build.mjs": "./build/copy-build.mjs",
+    "./testing/server.mjs": { "types": "./testing/server.d.mts", "default": "./testing/server.mjs" },
+    "./testing/playwright.mjs": { "types": "./testing/playwright.d.mts", "default": "./testing/playwright.mjs" },
+    "./testing/fixtures.mjs": { "types": "./testing/fixtures.d.mts", "default": "./testing/fixtures.mjs" },
+    "./testing/coverage.mjs": "./testing/coverage.mjs",
+    "./testing/helpers.mjs": { "types": "./testing/helpers.d.mts", "default": "./testing/helpers.mjs" },
+    "./package.json": "./package.json"
+  },
+  "files": ["src", "build", "testing", "tsconfig.base.json"],
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "tsc --noEmit && vitest run && playwright test"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.50",
+    "lit": "^3.3.1"
+  },
+  "peerDependenciesMeta": {
+    "@playwright/test": { "optional": true }
+  },
+  "dependencies": {
+    "axe-core": "^4.14.0",
+    "monocart-coverage-reports": "2.13.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "lit": "^3.3.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "vitest": "^3.2.4"
+  }
+}
