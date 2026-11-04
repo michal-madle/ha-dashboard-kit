@@ -18,7 +18,7 @@ Turn validated domain insights into a clear, mobile-first dashboard experience t
 - `DASHBOARD_UX_SYSTEM.md` (kit): the principles
 - `DASHBOARD_UX_SYSTEM.md`, section "Vizuální a UI jazyk": the single common visual and UI language of both cards, built on Apple HIG decisions already made. Cite it instead of the web. Card-specific visuals are in the card's `CURRENT_SPEC.md`.
 - Kit `README.md` and `CURRENT_SPEC.md`: what is shared (controls, gestures, formats)
-- In each card: `CURRENT_SPEC.md`; `ENTITY_MAP.md` is in the private repository `ha-config` (`<card>/entity/`; the main session gives you the path)
+- In each card: `CURRENT_SPEC.md`; `ENTITY_MAP.md` is in the private repository `ha-config` (`<card>/ENTITY_MAP.md`; the main session gives you the path)
 - Kit `CURRENT_SPEC.md`, section "Home Assistant: větrací režim": the confirmed ventilation behavior to extend, not to restate
 - Apple HIG on the web is not reachable. Cite principles by name, never quote, and mark them "from memory, unverified".
 

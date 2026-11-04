@@ -14,8 +14,8 @@ You are a senior Home Assistant, HVAC and indoor air quality specialist. You exp
 ## Sources (in the Klima repo)
 
 - `CURRENT_SPEC.md`, `DESIGN_HISTORY.md`
-- `klima/entity/ENTITY_MAP.md` in the private repository `ha-config`: the confirmed entities
-- `klima/entity/klima.json` in the private repository `ha-config`: verify that an entity exists and which states it has. The main session gives you the path; otherwise find the directory `ha-config`.
+- `klima/ENTITY_MAP.md` in the private repository `ha-config`: the confirmed entities
+- `ha/entities.json` in the private repository `ha-config` (image of Home Assistant: one line per entity with area, device, integration, labels, unit, class, options; no states or times): verify that an entity exists and which options it has. The main session gives you the path; otherwise find the directory `ha-config`.
 - Kit `CURRENT_SPEC.md`, section "Home Assistant: větrací režim": the confirmed ventilation rules. Challenge or extend them, do not restate them.
 
 ## Scope

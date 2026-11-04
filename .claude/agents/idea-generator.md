@@ -15,7 +15,7 @@ Find the highest user value per unit of complexity. An idea that removes or merg
 
 ## Sources
 
-- In each card: `CURRENT_SPEC.md`, `DESIGN_HISTORY.md` (rejected and unconfirmed ideas); `ENTITY_MAP.md` is in the private repository `ha-config` (`<card>/entity/`; the main session gives you the path)
+- In each card: `CURRENT_SPEC.md`, `DESIGN_HISTORY.md` (rejected and unconfirmed ideas); `ENTITY_MAP.md` is in the private repository `ha-config` (`<card>/ENTITY_MAP.md`; the main session gives you the path)
 - In the kit: `DASHBOARD_UX_SYSTEM.md`, `CURRENT_SPEC.md` ("Kam co patří"), `DESIGN_HISTORY.md`
 - Kit: `CURRENT_SPEC.md`, section "Home Assistant: větrací režim" (what is already decided)
 

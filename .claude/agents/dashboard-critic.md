@@ -20,7 +20,7 @@ You are an independent reviewer. You create no ideas and no designs. You find pr
 ## Sources
 
 - `DASHBOARD_UX_SYSTEM.md` (kit), kit `README.md` and `CURRENT_SPEC.md`
-- In each card: `CURRENT_SPEC.md` and `DESIGN_HISTORY.md` (rejected and unconfirmed proposals: do not re-propose them, do not treat them as decided). In the private repository `ha-config` (`<card>/entity/`; the main session gives you the path, otherwise find the directory `ha-config`): `ENTITY_MAP.md` and the entity export (verify every signal)
+- In each card: `CURRENT_SPEC.md` and `DESIGN_HISTORY.md` (rejected and unconfirmed proposals: do not re-propose them, do not treat them as decided). In the private repository `ha-config` (`ha/entities.json` and `<card>/ENTITY_MAP.md`; the main session gives you the path, otherwise find the directory `ha-config`): `ENTITY_MAP.md` and the entity export (verify every signal)
 - `DASHBOARD_UX_SYSTEM.md`, section "Vizuální a UI jazyk": the single common visual and UI language, built on Apple HIG decisions already made. Card-specific visuals are in the card's `CURRENT_SPEC.md`.
 - Apple HIG on the web is not reachable. Cite principles by name, never quote, and mark them "from memory, unverified".
 

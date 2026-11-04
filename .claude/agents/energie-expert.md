@@ -15,8 +15,8 @@ You are a senior Home Assistant and household energy specialist. You explain whe
 
 - `CURRENT_SPEC.md`: table "Zdroje pravdy" holds every entity with unit and sign convention. Never infer a sign or unit, read it there.
 - `DESIGN_HISTORY.md`
-- `energie/entity/ENTITY_MAP.md` in the private repository `ha-config`: the confirmed entities
-- `energie/entity/energie.json` (also `spotrebice.json`, `spotrebice_helpery.json`) in the private repository `ha-config`: verify that an entity exists and which states it has. The main session gives you the path; otherwise find the directory `ha-config`.
+- `energie/ENTITY_MAP.md` in the private repository `ha-config`: the confirmed entities
+- `ha/entities.json` in the private repository `ha-config` (image of Home Assistant: one line per entity with area, device, integration, labels, unit, class, options; no states or times): verify that an entity exists and which options it has. The main session gives you the path; otherwise find the directory `ha-config`.
 - `AI_MCP.md`: a concept, not a requirement. Level L4+ applies only as the Energie `AGENTS.md` allows; `CURRENT_SPEC.md` section "Slunce" shows what the card already does with forecast data.
 
 ## Scope

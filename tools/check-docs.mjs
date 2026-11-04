@@ -3,10 +3,10 @@
 // Použití: node tools/check-docs.mjs [--ha-config <adresář>] <adresář repozitáře> [další adresáře …]
 // Kontroluje: zakázané a neznámé .md soubory, povinné soubory, značky nepotvrzeného
 // ve spec / mapě entit / README, odkazy mezi soubory (včetně kotev) a entity ve spec,
-// mapě a příkladech, které nejsou v žádném exportu `<ha-config>/<karta>/entity/*.json`.
+// mapě a příkladech, které nejsou v obrazu Home Assistantu `<ha-config>/ha/entities.json`.
 // Soukromý repozitář `ha-config` se hledá vedle kontrolovaného repozitáře (nebo `--ha-config`,
-// nebo proměnná HA_CONFIG); karta `ha-<karta>-dashboard` má exporty ve složce `<karta>/entity/`.
-// `ENTITY_MAP.md` karty je v `ha-config` (`<karta>/entity/ENTITY_MAP.md`) a kontroluje se jako součást karty.
+// nebo proměnná HA_CONFIG). `ENTITY_MAP.md` karty `ha-<karta>-dashboard` je v `ha-config`
+// (`<karta>/ENTITY_MAP.md`) a kontroluje se jako součást karty.
 // Tvrdé pravidlo (AGENTS.md kitu, pravidlo 12): veřejné repozitáře obsahují jen veřejné věci. Kontrola hlásí
 // soukromé soubory (mapa entit, exporty, konfigurace HA, tokeny, týdenní ladění) a soukromé údaje v textu
 // (lokální IP adresy, tokeny JWT, VIN, notifikační služby podle jmen).
@@ -82,21 +82,18 @@ const cardKey = (repo) => basename(repo).replace(/^ha-(.+)-dashboard$/, "$1");
 
 function loadEntities(repo) {
   const ids = new Set();
-  const dir = join(haConfigDir(repo), cardKey(repo), "entity");
-  if (!existsSync(dir)) {
-    err(repo, "ENTITY_MAP.md", 0, `export entit nenalezen v ${dir} (repozitář ha-config musí být vedle karty, nebo zadejte --ha-config)`);
+  const file = join(haConfigDir(repo), "ha", "entities.json");
+  if (!existsSync(file)) {
+    err(repo, "ENTITY_MAP.md", 0, `obraz Home Assistantu nenalezen: ${file} (repozitář ha-config musí být vedle karty, nebo zadejte --ha-config)`);
     return ids;
   }
-  for (const f of readdirSync(dir)) {
-    if (!f.endsWith(".json")) continue;
-    try {
-      for (const r of JSON.parse(readFileSync(join(dir, f), "utf8"))) if (r.entity) ids.add(r.entity);
-    } catch (e) {
-      err(repo, `ha-config/${cardKey(repo)}/entity/${f}`, 0, `export není platný JSON (${e.message})`);
-    }
+  try {
+    for (const r of JSON.parse(readFileSync(file, "utf8"))) if (r.entity) ids.add(r.entity);
+  } catch (e) {
+    err(repo, "ha-config/ha/entities.json", 0, `obraz není platný JSON (${e.message})`);
   }
   // Entity potvrzené přímo uživatelem (mimo export): oddíl „## Potvrzeno uživatelem …“ v ENTITY_MAP.md.
-  const map = join(dir, "ENTITY_MAP.md");
+  const map = join(haConfigDir(repo), cardKey(repo), "ENTITY_MAP.md");
   if (existsSync(map)) {
     const m = readFileSync(map, "utf8").match(/^## Potvrzeno uživatelem[^\n]*\n([\s\S]*?)(?=^## |(?![\s\S]))/m);
     if (m) for (const e of m[1].matchAll(/`([a-z_]+\.[a-z0-9_]+)`/g)) ids.add(e[1]);
@@ -129,7 +126,7 @@ function checkPrivate(repo) {
 function check(repoArg) {
   const repo = resolve(repoArg);
   const isCard = /^ha-.+-dashboard$/.test(basename(repo));
-  const mapPath = join(haConfigDir(repo), cardKey(repo), "entity", "ENTITY_MAP.md");
+  const mapPath = join(haConfigDir(repo), cardKey(repo), "ENTITY_MAP.md");
   const mapRel = relative(repo, mapPath).split("\\").join("/");
   const files = walk(repo, repo).filter((f) => f.endsWith(".md") && !IGNORED_FILES.has(f));
   const siblings = ["ha-dashboard-kit", "ha-klima-dashboard", "ha-energie-dashboard"].map((n) => join(dirname(repo), n));
@@ -188,7 +185,7 @@ function check(repoArg) {
         for (const m of l.matchAll(ENTITY_RE)) {
           const id = `${m[1]}.${m[2]}`;
           if (NOT_ENTITY.test(m[2])) continue;
-          if (!exported.has(id)) err(repo, f, i + 1, `entita ${id} není v žádném exportu v ha-config/${cardKey(repo)}/entity/`);
+          if (!exported.has(id)) err(repo, f, i + 1, `entita ${id} není v obrazu Home Assistantu ha-config/ha/entities.json`);
         }
       });
     }
@@ -201,7 +198,7 @@ function check(repoArg) {
         for (const m of l.matchAll(ENTITY_RE)) {
           const id = `${m[1]}.${m[2]}`;
           if (NOT_ENTITY.test(m[2])) continue;
-          if (!exported.has(id)) warnings.push(`${basename(repo)}/examples/${f}:${i + 1}: zástupná entita ${id} (příklad; není v žádném exportu)`);
+          if (!exported.has(id)) warnings.push(`${basename(repo)}/examples/${f}:${i + 1}: zástupná entita ${id} (příklad; není v obrazu Home Assistantu)`);
         }
       });
     }
