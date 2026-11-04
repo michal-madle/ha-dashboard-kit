@@ -2,6 +2,15 @@
 
 Jen archiv. Nic z tohoto dokumentu není závazné; platí `CURRENT_SPEC.md`, `AGENTS.md` a `DASHBOARD_UX_SYSTEM.md`. Pravidla vedení: `AGENTS.md`, oddíl Dokumentace. Nejnovější záznamy jsou nahoře. Stav záznamu: **potvrzeno** (zapsáno do spec), **nahrazeno**, **zamítnuto**, **nepotvrzeno** (otázka položena uživateli v chatu, do spec nepatří).
 
+## 2026-11-04 · Práce na `main`, první skutečný obraz Home Assistantu, mapy entit proti obrazu (potvrzeno uživatelem)
+
+- Uživatel 4. 11. 2026: „tvoje větev bude main. všude. větev zruš a main přesun na ní.“ K otázkám: značka kitu „nerozumim“; token „ok“; první obraz: po spuštění `snapshot` výstup „Beze změny: 1815 entit.“; pravidlo 12 „nevim co je pravidlo 12“; plánovaný úkol Energie: „nemaž“ (zůstává vypnutý).
+- Provedeno: `main` všech čtyř repozitářů posunut na commity z větve (fast-forward), další práce je rovnou na `main` (pravidlo 8). Smazání vzdálené větve `claude/blissful-faraday-dlnbcs` proxy odmítla (HTTP 403), větev smaže uživatel.
+- Ověřeno: `snapshot.py` běží proti skutečnému Home Assistantu (1815 entit, 42 integrací, 11 oblastí, štítky Energy, Heating, Climate, Appliances, Mobility, Ventilation a další).
+- Mapy entit přeodvozeny proti obrazu: všechna ID v mapách Energie i Klimatu v obrazu jsou a žádné z nich není zakázané. Opraveno: zásobník Energie je `water_heater.technicka_mistnost_tado_ce_tepla_voda` (doplněno do mapy a do příkladu karty, testy přejmenovány; staré entity integrace `tado` jsou v obrazu zakázané); v mapě Klimatu je automatizace pro Ložnici `automation.loznice_obnova_topeni_pri_zavrenem_okne_loznice` (dřív bez předpony `loznice_`). Mapy dál uvádějí jen entity, které karta používá nebo které spec výslovně zmiňuje; ostatní aktivní entity se štítky karty (Energie 294, Klima 378) v mapách nejsou.
+- Ověřeno: `npm ci` a `npm test` v kopiích karet s novým pinem kitu: Energie 43 testů, Klima 31 testů prošlo; `check-docs` bez chyb ve všech třech repozitářích.
+- Nepotvrzeno, otázka položena D. M.: rozsah pravidla 12 (ID entit ve spec a příkladech karet, jména místností v Klimatu); uživatel odpověděl, že pravidlo 12 nezná, otázka byla přeformulována.
+
 ## 2026-11-04 · `ha-config` jako obraz Home Assistantu, jeden zdroj entit, zjednodušení, vazby kit–karty (potvrzeno uživatelem)
 
 - Uživatel 4. 11. 2026: „Zklamu tě vše je squash/force push. Fetchni si to. Oprav vazby mezi projekty aby šel npm install. Je nový export entit. Nicméně, šlo by to nějak sjednotit? Aby byl jen jeden zdroj? Nebaví mě dělat 4 exporty šablon. Navíc nevím co kde dát a vzít. Může být na jednom místě entity HA? Třeba komplet, a ty si pak vybereš?“ A dále: „A nerozumim nekterym souborum, spotrebice.txt, forecast.md apod. Zjednodus to. Vznikalo to bez nejake architektonicke vize, ted uz je to vetsi, mame repo pro private entity. Neni to potreba mit rozdelene. Udelejme z toho obraz HA na ktery muzes sahnout. A ja abych vedel ze kdyz neco pridam ze co mam pustit. A u entit nejlepe bez last modified a updated, aby nebylo tisice zmen s kazdym exportem.“
