@@ -2,6 +2,14 @@
 
 Jen archiv. Nic z tohoto dokumentu není závazné; platí `CURRENT_SPEC.md`, `AGENTS.md` a `DASHBOARD_UX_SYSTEM.md`. Pravidla vedení: `AGENTS.md`, oddíl Dokumentace. Nejnovější záznamy jsou nahoře. Stav záznamu: **potvrzeno** (zapsáno do spec), **nahrazeno**, **zamítnuto**, **nepotvrzeno** (otázka položena uživateli v chatu, do spec nepatří).
 
+## 2026-11-04 · Nové zařízení a nový obraz Home Assistantu (1861 entit)
+
+- Uživatel 4. 11. 2026: „Pridal jsem zarizeni a udelal novy export entit. Aktualizuj vse nutne (entity map apod?)“ A k hodinovému exportu: „Hotovo: 336 hodin. […] a entities nove pushnute“.
+- Změna obrazu `ha/entities.json` (1815 → 1861): přidáno 60, odebráno 14, změněno 12. Nová zařízení Větrák koupelna ložnice a Větrák záchod patro (Shelly 1PM Mini Gen4, oblast Koupelna) s automatizacemi „ventilation mode“ a štítek Ventilation na sedmi automatizacích větracího režimu. Zařízení Sušička bylo znovu přidáno (Shelly Plug M Gen3): entity mají nově v ID dvakrát `susicka` (například `sensor.technicka_mistnost_susicka_susicka_power`). Vstup větráku koupelna přízemí je nově `event.koupelna_vetrak_koupelna_prizemi` (dřív `…_input`).
+- Aktualizováno: ID sušičky v `energie/ENTITY_MAP.md`, `examples/energie.yaml` Energie, testech Energie (`tests/scenarios.js`), `yaml/automations.yaml` a `energie/tyden/export_hodiny.py`; ID vstupu větráku v `yaml/automations.yaml`; počty entit v obou mapách. Každé přejmenování je ověřeno obrazem (staré ID zmizelo, nové je u stejného zařízení).
+- Ověřeno: všechna ID v `yaml/automations.yaml` jsou v obrazu; `check-docs` bez chyb; `npm test` Energie v kopii: 43 testů prošlo (jeden test při první dávce selhal na zapomenutém prefixu sušičky ve fixtuře, opraveno). Historie sušičky před 4. 11. zůstává v Home Assistantu pod starými ID; hodinový export čte nová.
+- Nepotvrzeno, otázka položena D. M.: patří nové větráky (koupelna ložnice, záchod patro) do větracího režimu? `yaml/automations.yaml` je v seznamu větráků nemá a `CURRENT_SPEC.md` kitu říká „dva větráky“. Do odpovědi se chování nemění.
+
 ## 2026-11-04 · Práce na `main`, první skutečný obraz Home Assistantu, mapy entit proti obrazu (potvrzeno uživatelem)
 
 - Uživatel 4. 11. 2026: „tvoje větev bude main. všude. větev zruš a main přesun na ní.“ K otázkám: značka kitu „nerozumim“; token „ok“; první obraz: po spuštění `snapshot` výstup „Beze změny: 1815 entit.“; pravidlo 12 „nevim co je pravidlo 12“; plánovaný úkol Energie: „nemaž“ (zůstává vypnutý).
