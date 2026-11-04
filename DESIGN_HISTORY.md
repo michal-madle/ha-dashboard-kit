@@ -2,6 +2,14 @@
 
 Jen archiv. Nic z tohoto dokumentu není závazné; platí `CURRENT_SPEC.md`, `AGENTS.md` a `DASHBOARD_UX_SYSTEM.md`. Pravidla vedení: `AGENTS.md`, oddíl Dokumentace. Nejnovější záznamy jsou nahoře. Stav záznamu: **potvrzeno** (zapsáno do spec), **nahrazeno**, **zamítnuto**, **nepotvrzeno** (otázka položena uživateli v chatu, do spec nepatří).
 
+## 2026-11-04 · Nové větráky v režimu větrání, sušička zpět na původní ID (potvrzeno uživatelem)
+
+- Uživatel 4. 11. 2026: „nové větráky: ano patri do noveho rezimu“; „je aktualizovane automations.yaml“; „Pokud neco chybi, uprav to. ALE musis mi rict ze mam aktualizovat automatizace na HA.“; „susicka mela spatny id. vratil jsem to.“
+- Zapsáno: `CURRENT_SPEC.md`, oddíl Home Assistant: větrací režim: čtyři větráky (koupelna přízemí, koupelna patro, koupelna ložnice, záchod patro). Uživatel sám doplnil do `yaml/automations.yaml` nové větráky do seznamů zapnutí a vypnutí a dvě automatizace dlouhého stisku. Doplněno: „Ventilation mode - po restartu HA“ čeká i na nové větráky.
+- Nahrazeno: přejmenování sušičky na `…_susicka_susicka_…` ze záznamu výše neplatí, uživatel vrátil původní ID `technicka_mistnost_susicka_*` (obraz po změně: 13 entit zpět na původních ID). ID vrácena v mapě Energie, příkladu a testech Energie a v `export_hodiny.py`. Poslední hodinový export použil nesprávné ID (`export_report.txt`: BEZ DAT), sloupec sušičky je v něm prázdný; příští export ho naplní.
+- Opraveno navíc podle obrazu (zastaralá ID v YAML): `climate.obyvaci_pokoj_ac_obyvak` → `climate.obyvak_ac_obyvak` v `configuration.yaml`; `switch.technicka_mistnost_ventil_c1_switch_1` a `…c2_switch_1` → `switch.technicka_mistnost_ventil_c1` a `…c2` v `scripts.yaml`. `sensor.baterie_skutecna_zmena_soc` a `sensor.baterie_zmena_soc_5_min` definuje `configuration.yaml` sám a v obrazu nejsou (ta část konfigurace není v Home Assistantu nasazená).
+- Ověřeno: všechna ID v `yaml/automations.yaml` a `yaml/scripts.yaml` jsou v obrazu; YAML a šablona čekání se parsují; `check-docs` bez chyb; příklad a testy Energie jsou shodné s verzí, kde prošlo 43 testů.
+
 ## 2026-11-04 · Nové zařízení a nový obraz Home Assistantu (1861 entit)
 
 - Uživatel 4. 11. 2026: „Pridal jsem zarizeni a udelal novy export entit. Aktualizuj vse nutne (entity map apod?)“ A k hodinovému exportu: „Hotovo: 336 hodin. […] a entities nove pushnute“.

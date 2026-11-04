@@ -105,7 +105,7 @@ Platí pro každou kartu i každý prvek kitu: iPhone 14 Pro 393 × 852 na výš
 
 Rozhodnutí uživatele 3. 11. 2026. Záměr: „Ráno nebo večer chci otevřít okna, zapnout větráky a vyvětrat. Pak zavřít okna a vypnout větráky.“ Entity a automatizace jsou v soukromém repozitáři `ha-config`, složka `yaml/`, zde je jen chování.
 
-**Zařízení.** Dva větráky v koupelnách (Shelly 1PM Mini Gen4), stojanový ventilátor a čtyři okna s žaluziemi. Dveře na zahradu v obýváku se nepočítají. Klimatizace do režimu zatím nepatří.
+**Zařízení.** Čtyři větráky (Shelly 1PM Mini Gen4): koupelna přízemí, koupelna patro, koupelna ložnice a záchod patro (uživatel 4. 11. 2026 o dvou nových: „nové větráky: ano patri do noveho rezimu“), stojanový ventilátor a čtyři okna s žaluziemi. Dveře na zahradu v obýváku se nepočítají. Klimatizace do režimu zatím nepatří.
 
 **Tlačítka větráků** (nastaveno v Shelly, ověřeno skriptem uživatele). Single push zapne větrák na 2 min, double push na 10 min, long push ho zapne, dokud se nevypne. Jakýkoli stisk na zapnutém větráku ho vypne.
 
