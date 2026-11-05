@@ -2,6 +2,10 @@
 
 Jen archiv. Nic z tohoto dokumentu není závazné; platí `CURRENT_SPEC.md`, `AGENTS.md` a `DASHBOARD_UX_SYSTEM.md`. Pravidla vedení: `AGENTS.md`, oddíl Dokumentace. Nejnovější záznamy jsou nahoře. Stav záznamu: **potvrzeno** (zapsáno do spec), **nahrazeno**, **zamítnuto**, **nepotvrzeno** (otázka položena uživateli v chatu, do spec nepatří).
 
+## 2026-11-05 · Kolečko bez znaku „%“ (potvrzeno uživatelem)
+
+- Uživatel 5. 11. 2026 po kontrole popupu Větrací režim: „% se mi nelíbí ani u té energie. Upravit všude.“ Kolečko s procenty (Energie „Dnes zatím“, Klima Větrací režim) má jen číslo uprostřed, bez „%“ pod ním; `unit` zůstává pro kolečka s jinou jednotkou. Dřívější pravidlo „jednotka menší pod číslem“ platí jen pro ně.
+
 ## 2026-11-05 · Kolečko postupu jako společný prvek kitu (potvrzeno uživatelem)
 
 - Uživatel 5. 11. 2026 po brainstormingu popupu Větrací režim v Klimatu (kolečko místo proužku, „jako jinde typ kolečko u výkonu nebo kroky“): „Jo bude to komponenta na více míst.“

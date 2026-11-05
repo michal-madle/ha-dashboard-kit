@@ -131,7 +131,7 @@ test.describe("kolečko", () => {
     const ring = page.locator("#ring");
     await expect(ring.getByRole("img", { name: "Half done" })).toBeVisible();
     await expect(ring.locator(".num")).toHaveText("50");
-    await expect(ring.locator(".unit")).toHaveText("%");
+    await expect(ring.locator(".unit")).toHaveText("W");
     const box = await ring.locator(".ring").boundingBox();
     expect([box?.width, box?.height]).toEqual([40, 40]);
     const num = await ring.locator(".num").boundingBox();
@@ -140,6 +140,15 @@ test.describe("kolečko", () => {
     expect(Math.abs(num!.x + num!.width / 2 - (box!.x + box!.width / 2))).toBeLessThan(1);
     expect(unit!.y).toBeGreaterThan(num!.y);
     expect(await ring.locator(".fill").evaluate((fill) => getComputedStyle(fill).stroke)).toBe("rgb(48, 209, 88)");
+  });
+
+  test("procento nemá jednotku: číslo je uprostřed kolečka vodorovně i svisle", async ({ page }) => {
+    const ring = page.locator("#alone");
+    await expect(ring.locator(".unit")).toHaveCount(0);
+    const box = await ring.locator(".ring").boundingBox();
+    const num = await ring.locator(".num").boundingBox();
+    expect(Math.abs(num!.x + num!.width / 2 - (box!.x + box!.width / 2))).toBeLessThan(1);
+    expect(Math.abs(num!.y + num!.height / 2 - (box!.y + box!.height / 2))).toBeLessThan(1.5);
   });
 
   test("výplň je poměr obvodu a poměr se ořízne na 0 až 1; bez čísla je jen kruh", async ({ page }) => {
