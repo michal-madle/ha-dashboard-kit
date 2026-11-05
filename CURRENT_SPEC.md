@@ -27,7 +27,7 @@ Rozhodnutí, kam nový kód nebo pravidlo patří:
 | `ha-dashboard-kit/entities` | `src/entities.ts` | `entityState`, `readText`, `readNumber`, `isNoValue`, `stringList` |
 | `ha-dashboard-kit/config` | `src/config.ts` | pravidla konfigurace: `fail`, `withCardName`, `section`, `checkKeys`, `entityId`, `text`, `localizedText`, `pickText`, `allTexts`, `languageSetting`, `LANGUAGE_SETTINGS` |
 | `ha-dashboard-kit/gesture` | `src/gesture.ts` | `HoldOrDoubleTap`: podržení nebo dvojklep (chráněné ovládání) |
-| `ha-dashboard-kit/controls` | `src/controls/` | `defineControls(prefix)`, `HdkSwitch`, `HdkSegmented`, `HdkSlider`, `HintState`, `hintStyles` |
+| `ha-dashboard-kit/controls` | `src/controls/` | `defineControls(prefix)`, `HdkSwitch`, `HdkSegmented`, `HdkSlider`, `HdkRing`, `HintState`, `hintStyles` |
 | `ha-dashboard-kit/tsconfig.base.json` | `tsconfig.base.json` | společné nastavení TypeScriptu karet |
 | `ha-dashboard-kit/build/vite.mjs` | `build/vite.mjs` | `cardBuild(název)`: Vite pro jeden ES modul `dist/<název>.js` |
 | `ha-dashboard-kit/build/copy-build.mjs` | `build/copy-build.mjs` | zkopíruje `dist/<název>.js` do kořene repa pro HACS |
@@ -66,10 +66,11 @@ Společné pravidlo pro prvky, které dělají něco fyzického (žaluzie, míse
 
 ## Ovládací prvky
 
-- Prvky podle Apple HIG: přepínač (`<předpona>-switch`, 60 × 32 px, dlouhý bílý palec 40 × 26 px), segmentový ovladač (`-segmented`, kapsle 48 px, 40 px `compact`, 66 px s druhým řádkem) a posuvník (`-slider`, kapsle 52 px, tenká lišta 6 px, palec 38 × 24 px, nativní `input[type=range]` pod ním). Každý má účinnou dotykovou plochu aspoň 44 × 44 px.
+- Prvky podle Apple HIG: přepínač (`<předpona>-switch`, 60 × 32 px, dlouhý bílý palec 40 × 26 px), segmentový ovladač (`-segmented`, kapsle 48 px, 40 px `compact`, 66 px s druhým řádkem) a posuvník (`-slider`, kapsle 52 px, tenká lišta 6 px, palec 38 × 24 px, nativní `input[type=range]` pod ním). Každý ovladač má účinnou dotykovou plochu aspoň 44 × 44 px.
+- Kolečko postupu (`-ring`, uživatel 5. 11. 2026: „Jo bude to komponenta na více míst“; dříve `ring()` panelu „Dnes zatím“ v Energii): plný kruh vyplněný po směru hodin od 12 hodin se zaoblenými konci, vlastnosti `fraction` (0 až 1), `size` (výchozí 40 px), `stroke` (výchozí 6 px), `num` (číslo uprostřed, s jednotkou `unit` menší pod ním; bez `num` jen kruh) a `label` (název pro čtečku, `role="img"`). Číslo má velikost `size × 0,3` (do 44 px, jinak `× 0,27`), jednotka 10 px. Nehýbe se a nic neanimuje. Není ovladač, takže dotykovou plochu nemá. Barvy: `--hdk-ring-track`, `--hdk-ring-fill` (barvu výplně dodá karta, např. zelenou při dosaženém cíli), `--hdk-ring-text`, `--hdk-ring-sub`.
 - Události (bublají a přecházejí přes shadow root): `hdk-toggle` (`detail.checked` = požadovaný nový stav), `hdk-select` (`detail.value`), `hdk-input` (průběžně při tažení) a `hdk-change` (`detail.value` po nastavení).
 - Vlastnosti chráněných prvků: `guarded`, `holdMs`, `doubleTapMs`, `hintSeconds`, `hint` (text nápovědy, dodá karta ve svém jazyce), `hintPlacement` přepínače (`above` / `below`).
-- Barvy bere prvek z CSS proměnných `--hdk-*`, které karta namapuje na své (`:host { --hdk-accent: var(--ed-accent); … }`). Prvek nezná barvy karty ani světlý a tmavý režim; ten řeší karta tím, co do proměnných dosadí. Proměnné: `--hdk-accent`, `--hdk-switch-off`, `--hdk-track`, `--hdk-track-compact`, `--hdk-bar`, `--hdk-tick`, `--hdk-secondary`, `--hdk-seg-thumb`, `--hdk-seg-text`, `--hdk-seg-selected`, `--hdk-bubble`, `--hdk-bubble-text`. Každá má v prvku tmavou výchozí hodnotu.
+- Barvy bere prvek z CSS proměnných `--hdk-*`, které karta namapuje na své (`:host { --hdk-accent: var(--ed-accent); … }`). Prvek nezná barvy karty ani světlý a tmavý režim; ten řeší karta tím, co do proměnných dosadí. Proměnné: `--hdk-ring-track`, `--hdk-ring-fill`, `--hdk-ring-text`, `--hdk-ring-sub` (kolečko), `--hdk-accent`, `--hdk-switch-off`, `--hdk-track`, `--hdk-track-compact`, `--hdk-bar`, `--hdk-tick`, `--hdk-secondary`, `--hdk-seg-thumb`, `--hdk-seg-text`, `--hdk-seg-selected`, `--hdk-bubble`, `--hdk-bubble-text`. Každá má v prvku tmavou výchozí hodnotu.
 
 ## Konfigurace (společná pravidla)
 

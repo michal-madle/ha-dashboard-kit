@@ -2,6 +2,12 @@
 
 Jen archiv. Nic z tohoto dokumentu není závazné; platí `CURRENT_SPEC.md`, `AGENTS.md` a `DASHBOARD_UX_SYSTEM.md`. Pravidla vedení: `AGENTS.md`, oddíl Dokumentace. Nejnovější záznamy jsou nahoře. Stav záznamu: **potvrzeno** (zapsáno do spec), **nahrazeno**, **zamítnuto**, **nepotvrzeno** (otázka položena uživateli v chatu, do spec nepatří).
 
+## 2026-11-05 · Kolečko postupu jako společný prvek kitu (potvrzeno uživatelem)
+
+- Uživatel 5. 11. 2026 po brainstormingu popupu Větrací režim v Klimatu (kolečko místo proužku, „jako jinde typ kolečko u výkonu nebo kroky“): „Jo bude to komponenta na více míst.“
+- Zapsáno: `HdkRing` (`src/controls/ring.ts`, `<předpona>-ring`), převzato z `ring()` v `sun.ts` Energie beze změny vzhledu (40 px, tah 6, číslo `size × 0,3`, jednotka 10 px); barvy přes `--hdk-ring-*`. Energie ho používá místo vlastní kopie, Klima v popupu Větrací režim.
+- Nepotvrzeno, otázka položena D. M.: jednotka 10 px je pod 11 px (HIG) a pod stylem Caption 1 12 px v `DASHBOARD_UX_SYSTEM.md`; zůstává, aby se vzhled Energie nezměnil.
+
 ## 2026-11-04 · Nové větráky v režimu větrání, sušička zpět na původní ID (potvrzeno uživatelem)
 
 - Uživatel 4. 11. 2026: „nové větráky: ano patri do noveho rezimu“; „je aktualizovane automations.yaml“; „Pokud neco chybi, uprav to. ALE musis mi rict ze mam aktualizovat automatizace na HA.“; „susicka mela spatny id. vratil jsem to.“
