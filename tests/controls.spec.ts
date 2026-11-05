@@ -12,8 +12,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("registrace je idempotentní: dvojí defineControls nespadne a prvky jsou definované", async ({ page }) => {
-  const defined = await page.evaluate(() => ["kit-switch", "kit-segmented", "kit-slider"].map((name) => !!customElements.get(name)));
-  expect(defined).toEqual([true, true, true]);
+  const defined = await page.evaluate(() => ["kit-switch", "kit-segmented", "kit-slider", "kit-ring"].map((name) => !!customElements.get(name)));
+  expect(defined).toEqual([true, true, true, true]);
 });
 
 test("nechráněný přepínač přepne jedním klepnutím", async ({ page }) => {
@@ -124,4 +124,33 @@ test("posuvník: klávesnice změní hodnotu a pošle hdk-change; čtečka má n
 
 test("přístupnost: axe bez porušení", async ({ page }) => {
   expect(await axeViolations(page)).toEqual([]);
+});
+
+test.describe("kolečko", () => {
+  test("je obrázek s názvem, číslo uprostřed a jednotka pod ním; výplň je z tokenu", async ({ page }) => {
+    const ring = page.locator("#ring");
+    await expect(ring.getByRole("img", { name: "Half done" })).toBeVisible();
+    await expect(ring.locator(".num")).toHaveText("50");
+    await expect(ring.locator(".unit")).toHaveText("%");
+    const box = await ring.locator(".ring").boundingBox();
+    expect([box?.width, box?.height]).toEqual([40, 40]);
+    const num = await ring.locator(".num").boundingBox();
+    const unit = await ring.locator(".unit").boundingBox();
+    // The number is centred horizontally and the unit stands under it.
+    expect(Math.abs(num!.x + num!.width / 2 - (box!.x + box!.width / 2))).toBeLessThan(1);
+    expect(unit!.y).toBeGreaterThan(num!.y);
+    expect(await ring.locator(".fill").evaluate((fill) => getComputedStyle(fill).stroke)).toBe("rgb(48, 209, 88)");
+  });
+
+  test("výplň je poměr obvodu a poměr se ořízne na 0 až 1; bez čísla je jen kruh", async ({ page }) => {
+    const dash = (selector: string) =>
+      page.locator(selector).locator(".fill").evaluate((fill: Element) => {
+        const [filled, whole] = (fill.getAttribute("stroke-dasharray") ?? "").split(" ").map(Number);
+        return Math.round((filled / whole) * 1000) / 1000;
+      });
+    expect(await dash("#ring")).toBe(0.5);
+    expect(await dash("#bare")).toBe(1);
+    await expect(page.locator("#bare .num")).toHaveCount(0);
+    expect(await axeViolations(page)).toEqual([]);
+  });
 });

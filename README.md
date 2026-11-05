@@ -62,7 +62,7 @@ export const getI18n = (language: Language, hass?: HomeAssistant): I18n => kitGe
 ```ts
 // src/index.ts karty: prvky s předponou karty
 import { defineControls } from "ha-dashboard-kit/controls";
-defineControls("ed"); // <ed-switch>, <ed-segmented>, <ed-slider>
+defineControls("ed"); // <ed-switch>, <ed-segmented>, <ed-slider>, <ed-ring>
 ```
 
 Barvy prvků karta namapuje na `--hdk-*` (seznam v [CURRENT_SPEC.md](./CURRENT_SPEC.md), oddíl Ovládací prvky); události prvků jsou `hdk-toggle`, `hdk-select`, `hdk-input`, `hdk-change`.
