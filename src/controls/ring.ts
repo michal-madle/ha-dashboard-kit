@@ -4,9 +4,9 @@ import type { TemplateResult } from "lit";
 
 /**
  * Progress ring (CURRENT_SPEC.md, Ovládací prvky, Kolečko): a full circle that fills clockwise from
- * 12 o'clock with rounded ends, the number centred in it and the unit smaller under the number
- * (DASHBOARD_UX_SYSTEM.md, pravidlo pro kolečka a měřiče s číslem). Without `num` it is only the
- * circle. The card sets the colours through the tokens `--hdk-ring-track`, `--hdk-ring-fill`
+ * 12 o'clock with rounded ends and the number centred in it (a unit, when there is one, is smaller
+ * under the number: DASHBOARD_UX_SYSTEM.md, pravidlo pro kolečka a měřiče s číslem; a percentage
+ * has no unit at all). Without `num` it is only the circle. The card sets the colours through the tokens `--hdk-ring-track`, `--hdk-ring-fill`
  * (the colour of the fill, e.g. green when the goal is reached), `--hdk-ring-text` and
  * `--hdk-ring-sub`. It has `role="img"` and `label` as its name; it moves and animates nothing.
  */
@@ -19,7 +19,7 @@ export class HdkRing extends LitElement {
   @property({ type: Number }) stroke = 6;
   /** The number in the middle (a text, already formatted); empty = no number. */
   @property() num = "";
-  /** The unit under the number. */
+  /** The unit under the number (none for a percentage). */
   @property() unit = "";
   /** The accessible name: what the ring says in words. */
   @property() label = "";
@@ -52,11 +52,15 @@ export class HdkRing extends LitElement {
       text-align: center;
     }
     .num {
-      transform: translateY(-62%);
+      transform: translateY(-50%);
       color: var(--hdk-ring-text, currentColor);
       font-weight: 700;
       line-height: 1;
       font-variant-numeric: tabular-nums;
+    }
+    /* With a unit the number rises a little to make room for it under the number. */
+    .num.with-unit {
+      transform: translateY(-62%);
     }
     .unit {
       margin-top: 8px;
@@ -88,7 +92,7 @@ export class HdkRing extends LitElement {
         ></circle>
       </svg>
       ${this.num
-        ? html`<span class="num" style="font-size:${Math.round(size * (size <= 44 ? 0.3 : 0.27))}px">${this.num}</span>${this.unit
+        ? html`<span class="num ${this.unit ? "with-unit" : ""}" style="font-size:${Math.round(size * (size <= 44 ? 0.3 : 0.27))}px">${this.num}</span>${this.unit
             ? html`<span class="unit">${this.unit}</span>`
             : nothing}`
         : nothing}
