@@ -2,6 +2,13 @@
 
 Jen archiv. Nic z tohoto dokumentu není závazné; platí `CURRENT_SPEC.md`, `AGENTS.md` a `DASHBOARD_UX_SYSTEM.md`. Pravidla vedení: `AGENTS.md`, oddíl Dokumentace. Nejnovější záznamy jsou nahoře. Stav záznamu: **potvrzeno** (zapsáno do spec), **nahrazeno**, **zamítnuto**, **nepotvrzeno** (otázka položena uživateli v chatu, do spec nepatří).
 
+## 2026-11-06 · Nový obraz Home Assistantu (1984 entit), přejmenované výkony spotřebičů
+
+- Uživatel 6. 11. 2026: „Aktualizoval jsem git, jsou tam nove zarizeni a nektera jsou prejmenovana. Export energie i klima je 90 dni. Aktualizuj entity map a rekni co potrebujes dal.“
+- Změna obrazu `ha/entities.json` (1906 → 1984): přidáno 113, odebráno 35. Entity výkonu spotřebičů ztratily příponu `_power` (pračka, sušička, myčka, digestoř, lednice, trouba, mikrovlnka, oběhové čerpadlo, čtyři větráky koupelny); čítače `_energy` pračky, sušičky, myčky a větráků jsou `disabled`. Nová zařízení: Varná deska L a P, Ostrůvek, Pracovní linka horní zásuvky (cuco), Garážová vrata (nahrazují Vypínač garážová vrata). Okenní čidla mají nově `binary_sensor.*_battery`.
+- Aktualizováno: obě `ENTITY_MAP.md` v `ha-config` (ID výkonů, vypnuté čítače, nová kuchyňská zařízení bez zařazení do skupiny, oběhové čerpadlo, větráky, baterie čidel, počty). `check-docs` bez chyb.
+- Nepotvrzeno, otázky položeny D. M.: čítače `_energy` tří spotřebičů vypnuté (cykly), `yaml/automations.yaml` odkazuje na vypnuté čítače a na neexistující `input_number.*_pracka_start` / `*_susicka_start` (v obrazu je `_power_start`), `configuration.yaml` odkazuje na neexistující `sensor.kuchyne_pracovni_linka_horni_zasuvky`, `energie/tyden/export_hodiny.py` čte staré ID s `_power`, zařazení nových kuchyňských zařízení do skupiny Kuchyně, rozsah hodinových exportů (13. 10.–6. 11., ne 90 dní).
+
 ## 2026-11-05 · Kolečko bez znaku „%“ (potvrzeno uživatelem)
 
 - Uživatel 5. 11. 2026 po kontrole popupu Větrací režim: „% se mi nelíbí ani u té energie. Upravit všude.“ Kolečko s procenty (Energie „Dnes zatím“, Klima Větrací režim) má jen číslo uprostřed, bez „%“ pod ním; `unit` zůstává pro kolečka s jinou jednotkou. Dřívější pravidlo „jednotka menší pod číslem“ platí jen pro ně.
