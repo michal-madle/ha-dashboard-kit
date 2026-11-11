@@ -15,5 +15,9 @@ export default defineConfig({
     url: `http://127.0.0.1:${port}/tests/harness.html`,
     reuseExistingServer: !process.env.CI,
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], viewport } }],
+  // WebKit (blíž Safari a aplikaci HA na iPhonu) jako u karet: PW_WEBKIT=1 (testing/playwright.mjs).
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"], viewport } },
+    ...(process.env.PW_WEBKIT ? [{ name: "webkit", use: { ...devices["Desktop Safari"], viewport } }] : []),
+  ],
 });

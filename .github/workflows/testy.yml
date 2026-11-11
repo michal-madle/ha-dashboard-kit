@@ -1,0 +1,29 @@
+name: Testy
+
+# Q29 (uživatel 11. 11. 2026): testy i ve WebKitu, jádru Safari a aplikace Home Assistant na iPhonu.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npm test -- --project=${{ matrix.browser }}
+        env:
+          CI: "1"
+          PW_WEBKIT: ${{ matrix.browser == 'webkit' && '1' || '' }}
