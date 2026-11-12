@@ -3,6 +3,7 @@
 ## Project scope and sources of truth
 
 - This repository is `ha-dashboard-kit`: the shared building blocks of two Home Assistant Lovelace custom cards, `ha-klima-dashboard` and `ha-energie-dashboard`. It is not a card, not a Home Assistant integration and has no build; it ships TypeScript sources (and a few `.mjs` tools) that the cards bundle into their own file.
+- `CURRENT_SPEC.md` and `DESIGN_HISTORY.md` of the kit are in the private repository `ha-config` (`kit/`), next to this repository; references "CURRENT_SPEC.md, section" in code and tests point there.
 - Read `CURRENT_SPEC.md` first: it holds the decisions of the user and the rule for what belongs here ("Kam co patří") with the map of modules. `README.md` shows how a card uses the kit; `DESIGN_HISTORY.md` is history only and not binding; open questions are asked in the chat, never stored in files (see `AGENTS.md`, section Dokumentace).
 - What belongs in the kit: code and rules that both cards share and that do not depend on a card's entities, texts, colours or layout. What does not: texts for the user, entity IDs, card names, card colours. Never copy kit code into a card "for now"; move it here first.
 - Do not invent Home Assistant behaviour, entity IDs, units or signs. The repository is public: never commit personal data from Home Assistant.

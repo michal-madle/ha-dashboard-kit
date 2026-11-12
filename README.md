@@ -2,7 +2,7 @@
 
 Společné stavební kameny Lovelace karet pro Home Assistant, které dělám: [ha-klima-dashboard](https://github.com/michal-madle/ha-klima-dashboard) (místnosti) a [ha-energie-dashboard](https://github.com/michal-madle/ha-energie-dashboard) (energie domu). Kit není karta: nic se z něj neinstaluje přes HACS a nemá build. Dodává TypeScript zdroje, které si karta zabalí do svého souboru.
 
-**Kam co patří:** společný kód, společná pravidla a společná testovací a build infrastruktura se zakládají tady, ne v kartě. Kartě zůstává to, co zná její entity, texty a vzhled. Přesná pravidla a mapa modulů jsou v [CURRENT_SPEC.md](./CURRENT_SPEC.md) (oddíl Kam co patří).
+**Kam co patří:** společný kód, společná pravidla a společná testovací a build infrastruktura se zakládají tady, ne v kartě. Kartě zůstává to, co zná její entity, texty a vzhled. Přesná pravidla a mapa modulů jsou ve spec kitu `CURRENT_SPEC.md` (oddíl Kam co patří) v soukromém repozitáři `ha-config` (`kit/`).
 
 ## Co kit obsahuje
 
@@ -65,13 +65,13 @@ import { defineControls } from "ha-dashboard-kit/controls";
 defineControls("ed"); // <ed-switch>, <ed-segmented>, <ed-slider>, <ed-ring>
 ```
 
-Barvy prvků karta namapuje na `--hdk-*` (seznam v [CURRENT_SPEC.md](./CURRENT_SPEC.md), oddíl Ovládací prvky); události prvků jsou `hdk-toggle`, `hdk-select`, `hdk-input`, `hdk-change`.
+Barvy prvků karta namapuje na `--hdk-*` (seznam ve spec kitu `CURRENT_SPEC.md`, oddíl Ovládací prvky); události prvků jsou `hdk-toggle`, `hdk-select`, `hdk-input`, `hdk-change`.
 
 Testy karty: `tests/server.mjs` volá `startServer`, `playwright.config.ts` volá `cardPlaywrightConfig`, `tests/fixtures.ts` volá `makeTest`, `tests/coverage.mjs` volá `runCoverage` (příklady v hlavičkách souborů ve složce `testing/`).
 
 ## Jak se kit mění
 
-1. Změna v kitu, test, úprava [CURRENT_SPEC.md](./CURRENT_SPEC.md) a tohoto README (společné pravidlo patří sem, ne do karty).
+1. Změna v kitu, test, úprava spec kitu (`CURRENT_SPEC.md` v `ha-config/kit/`) a tohoto README (společné pravidlo patří sem, ne do karty).
 2. `npm test` (typy, jednotkové testy, testy ovládacích prvků v prohlížeči).
 3. Commit a push na `main`.
 4. V každé kartě `npm install git+https://github.com/michal-madle/ha-dashboard-kit.git#<commit>`, kontrola `resolved` v `package-lock.json` (`git+https`), `npm test`, commit. Zpětně nekompatibilní změna zvyšuje MAJOR a obě karty se přepíšou v témže kole.
@@ -86,4 +86,4 @@ npm test          # tsc --noEmit, vitest, Playwright (tests/harness.html přes V
 npm run check     # jen typy
 ```
 
-Pravidla dokumentace (jen ověřené a potvrzené, otázky v chatu, `DESIGN_HISTORY.md` všude) jsou v [AGENTS.md](./AGENTS.md#dokumentace-rozhodnutí-uživatele-2-11-2026); kontrola dokumentace: `node tools/check-docs.mjs <adresář repozitáře>`. Návod na připojení Claude k Home Assistantu je v [AI_MCP.md](./AI_MCP.md).
+Pravidla dokumentace (jen ověřené a potvrzené, otázky v chatu, `DESIGN_HISTORY.md` kitu i karet v `ha-config`) jsou v [AGENTS.md](./AGENTS.md#dokumentace-rozhodnutí-uživatele-2-11-2026); kontrola dokumentace: `node tools/check-docs.mjs <adresář repozitáře>`. Návod na připojení Claude k Home Assistantu je v [AI_MCP.md](./AI_MCP.md).
