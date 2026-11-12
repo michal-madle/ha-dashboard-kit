@@ -13,6 +13,7 @@ Společné stavební kameny Lovelace karet pro Home Assistant, které dělám: [
 | `ha-dashboard-kit/entities` | `entityState`, `readText`, `readNumber`, `isNoValue`, `stringList` |
 | `ha-dashboard-kit/config` | pravidla konfigurace: `fail`, `withCardName`, `section`, `checkKeys`, `entityId`, `text`, `localizedText`, `pickText`, `allTexts`, `languageSetting` |
 | `ha-dashboard-kit/gesture` | `HoldOrDoubleTap`: podržení nebo dvojklep (chráněné ovládání) |
+| `ha-dashboard-kit/joined` | `joined`, `joinedText`, `fitJoined`, `joinedStyles`: text z částí s tečkou; když se nevejde na řádek, je každá část na svém řádku bez tečky |
 | `ha-dashboard-kit/controls` | `defineControls(předpona)`: přepínač, segmentový ovladač, posuvník podle Apple HIG |
 | `ha-dashboard-kit/tsconfig.base.json` | společné nastavení TypeScriptu |
 | `ha-dashboard-kit/build/vite.mjs`, `build/copy-build.mjs` | sestavení karty do jednoho souboru a jeho zkopírování do kořene pro HACS |

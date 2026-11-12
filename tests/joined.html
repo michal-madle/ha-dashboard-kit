@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ha-dashboard-kit – joined</title>
+  <style>
+    html, body { margin: 0; background: #1c1c1e; color: #fff; font: 15px/20px sans-serif; }
+    .box { margin: 8px; outline: 1px solid #444; }
+  </style>
+</head>
+<body>
+  <main id="main"></main>
+  <script type="module">
+    import { LitElement, html, css } from "lit";
+    import { joined, joinedText, fitJoined, joinedStyles } from "/src/joined.ts";
+    class JoinedTest extends LitElement {
+      static properties = { width: { type: Number } };
+      static styles = [joinedStyles, css`.box { margin: 8px; outline: 1px solid #444; } .value { text-align: right; }`];
+      constructor() { super(); this.width = 400; }
+      render() {
+        return html`
+          <div class="box" id="rows" style="width:${this.width}px">${joined(["Přetoky 60", "Boost 55 °C"])}</div>
+          <div class="box value" id="whole" style="width:${this.width}px">${joined([html`Přetoky <b>60<span class="joined-only"> °C</span></b>`, html`Boost <b>55 °C</b>`], { whole: true })}</div>
+          <div class="box" id="flow" style="width:${this.width}px">${joinedText("The boiler heats from the battery and the grid · Boost")}</div>
+          <div class="box" id="one" style="width:${this.width}px">${joinedText("Bez ohřevu")}</div>`;
+      }
+      updated() { fitJoined(this.renderRoot, String(this.width)); }
+    }
+    customElements.define("joined-test", JoinedTest);
+    document.getElementById("main").append(document.createElement("joined-test"));
+    window.ready = true;
+  </script>
+</body>
+</html>

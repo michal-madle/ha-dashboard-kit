@@ -10,6 +10,7 @@
     "./entities": "./src/entities.ts",
     "./config": "./src/config.ts",
     "./gesture": "./src/gesture.ts",
+    "./joined": "./src/joined.ts",
     "./controls": "./src/controls/index.ts",
     "./tsconfig.base.json": "./tsconfig.base.json",
     "./build/vite.mjs": { "types": "./build/vite.d.mts", "default": "./build/vite.mjs" },
