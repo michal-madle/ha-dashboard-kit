@@ -12,8 +12,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("registrace je idempotentní: dvojí defineControls nespadne a prvky jsou definované", async ({ page }) => {
-  const defined = await page.evaluate(() => ["kit-switch", "kit-segmented", "kit-slider", "kit-ring"].map((name) => !!customElements.get(name)));
-  expect(defined).toEqual([true, true, true, true]);
+  const defined = await page.evaluate(() => ["kit-switch", "kit-segmented", "kit-slider", "kit-ring", "kit-tile"].map((name) => !!customElements.get(name)));
+  expect(defined).toEqual([true, true, true, true, true]);
 });
 
 test("nechráněný přepínač přepne jedním klepnutím", async ({ page }) => {
@@ -160,6 +160,73 @@ test.describe("kolečko", () => {
     expect(await dash("#ring")).toBe(0.5);
     expect(await dash("#bare")).toBe(1);
     await expect(page.locator("#bare .num")).toHaveCount(0);
+    expect(await axeViolations(page)).toEqual([]);
+  });
+});
+
+test.describe("dlaždice (CURRENT_SPEC.md, Ovládací prvky, Dlaždice)", () => {
+  const tile = (page: Page, id: string) => page.locator(`#${id}`);
+
+  test("chráněná dlaždice: jedno klepnutí jen ukáže nápovědu nad dlaždicí uvnitř stránky a nic nehne", async ({ page }) => {
+    const grid = await page.locator("#tiles").boundingBox();
+    const box = await tile(page, "t-fan").boundingBox();
+    await tile(page, "t-fan").click();
+    const hint = tile(page, "t-fan").locator(".hint");
+    await expect(hint).toHaveText("Hold or tap twice.");
+    expect(await events(page)).toEqual([]);
+    const bubble = (await hint.boundingBox())!;
+    expect(bubble.y + bubble.height).toBeLessThanOrEqual(box!.y + 1);
+    expect(bubble.x).toBeGreaterThanOrEqual(0);
+    expect(await tile(page, "t-fan").boundingBox()).toEqual(box);
+    expect(await page.locator("#tiles").boundingBox()).toEqual(grid);
+  });
+
+  test("chráněná dlaždice přepne dvojklepem, podržením právě jednou a klávesnicí hned; zapnutá žádá vypnutí", async ({ page }) => {
+    await tile(page, "t-fan").dblclick();
+    expect(await events(page)).toEqual([{ type: "hdk-toggle", id: "t-fan", detail: { checked: true } }]);
+    const box = (await tile(page, "t-on").boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(700);
+    await page.mouse.up();
+    expect((await events(page)).slice(1)).toEqual([{ type: "hdk-toggle", id: "t-on", detail: { checked: false } }]);
+    await tile(page, "t-fan").locator("button").focus();
+    await page.keyboard.press("Space");
+    expect((await events(page)).length).toBe(3);
+  });
+
+  test("dlaždice s popupem se otevře jedním klepnutím i s guarded, má šipku a aria-haspopup", async ({ page }) => {
+    await tile(page, "t-open").click();
+    expect(await events(page)).toEqual([{ type: "hdk-open", id: "t-open", detail: {} }]);
+    await expect(tile(page, "t-open").locator(".chevron")).toHaveText("›");
+    await expect(tile(page, "t-open").locator("button")).toHaveAttribute("aria-haspopup", "dialog");
+    await expect(tile(page, "t-fan").locator(".chevron")).toHaveCount(0);
+  });
+
+  test("předvolba: akce s počtem, chráněná jen dvojklepem; nechráněná hned; vypnutá nic", async ({ page }) => {
+    await expect(tile(page, "t-preset").locator(".count")).toHaveText("3");
+    await tile(page, "t-preset").click();
+    expect(await events(page)).toEqual([]);
+    await page.waitForTimeout(500);
+    await tile(page, "t-preset").dblclick();
+    await tile(page, "t-free").click();
+    await tile(page, "t-dis").click({ force: true });
+    expect(await events(page)).toEqual([{ type: "hdk-press", id: "t-preset", detail: {} }, { type: "hdk-press", id: "t-free", detail: {} }]);
+  });
+
+  test("stavy vypadají různě (obrys, výplň, zapnuto, smíšeno), dlaždice má aspoň 44 px a axe nic nehlásí", async ({ page }) => {
+    const look = (id: string) => tile(page, id).locator("button").evaluate((button) => {
+      const style = getComputedStyle(button);
+      return { bg: style.backgroundColor, shadow: style.boxShadow, h: button.getBoundingClientRect().height, w: button.getBoundingClientRect().width };
+    });
+    const [off, on, idle, mixed] = [await look("t-fan"), await look("t-on"), await look("t-open"), await look("t-preset")];
+    expect(off.bg).toBe("rgba(0, 0, 0, 0)");
+    expect(off.shadow).not.toBe("none");
+    expect(new Set([off.bg, on.bg, idle.bg, mixed.bg]).size).toBe(4);
+    for (const item of [off, on, idle, mixed]) {
+      expect(item.h).toBeGreaterThanOrEqual(44);
+      expect(item.w).toBeGreaterThanOrEqual(44);
+    }
     expect(await axeViolations(page)).toEqual([]);
   });
 });

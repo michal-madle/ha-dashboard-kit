@@ -63,10 +63,10 @@ export const getI18n = (language: Language, hass?: HomeAssistant): I18n => kitGe
 ```ts
 // src/index.ts karty: prvky s předponou karty
 import { defineControls } from "ha-dashboard-kit/controls";
-defineControls("ed"); // <ed-switch>, <ed-segmented>, <ed-slider>, <ed-ring>
+defineControls("ed"); // <ed-switch>, <ed-segmented>, <ed-slider>, <ed-ring>, <ed-tile>
 ```
 
-Barvy prvků karta namapuje na `--hdk-*` (seznam ve spec kitu `CURRENT_SPEC.md`, oddíl Ovládací prvky); události prvků jsou `hdk-toggle`, `hdk-select`, `hdk-input`, `hdk-change`.
+Barvy prvků karta namapuje na `--hdk-*` (seznam ve spec kitu `CURRENT_SPEC.md`, oddíl Ovládací prvky); události prvků jsou `hdk-toggle`, `hdk-select`, `hdk-input`, `hdk-change`, `hdk-press` a `hdk-open`.
 
 Testy karty: `tests/server.mjs` volá `startServer`, `playwright.config.ts` volá `cardPlaywrightConfig`, `tests/fixtures.ts` volá `makeTest`, `tests/coverage.mjs` volá `runCoverage` (příklady v hlavičkách souborů ve složce `testing/`).
 
