@@ -23,7 +23,8 @@
           <div class="box" id="rows" style="width:${this.width}px">${joined(["Přetoky 60", "Boost 55 °C"])}</div>
           <div class="box value" id="whole" style="width:${this.width}px">${joined([html`Přetoky <b>60<span class="joined-only"> °C</span></b>`, html`Boost <b>55 °C</b>`], { whole: true })}</div>
           <div class="box" id="flow" style="width:${this.width}px">${joinedText("The boiler heats from the battery and the grid · Boost")}</div>
-          <div class="box" id="one" style="width:${this.width}px">${joinedText("Bez ohřevu")}</div>`;
+          <div class="box" id="one" style="width:${this.width}px">${joinedText("Bez ohřevu")}</div>
+          <div class="box" id="three" style="width:${this.width}px">${joinedText("12:00 · 3,2 kW · nabíjí")}</div>`;
       }
       updated() { fitJoined(this.renderRoot, String(this.width)); }
     }

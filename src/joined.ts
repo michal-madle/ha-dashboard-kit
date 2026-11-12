@@ -5,7 +5,8 @@ import type { TemplateResult } from "lit";
  * Text from parts joined by a dot (CURRENT_SPEC.md, Text z částí; uživatel 12. 11. 2026: „když je na 2 řádky,
  * není tam · oddělovač ale oddělovačem je nový řádek“, „Q126 A“ = in both cards):
  * - one line with the dots when it fits: „Přetoky 60 · Boost 55 °C“;
- * - else one part per line without the dot: „Přetoky 60 °C“ / „Boost 55 °C“;
+ * - else the lines break only at a dot, and that dot goes: „Přetoky 60 °C“ / „Boost 55 °C“ (more parts: the dots
+ *   inside a line stay, „12:00 · 3,2 kW“ / „nabíjí“);
  * - a part that does not fit even its own line: one flowing text, the dot never starts or ends a line.
  * `fitJoined` decides after drawing; the card calls it from `updated()` and when a web font arrives.
  */
@@ -19,7 +20,7 @@ export interface JoinedOptions {
 export function joined(parts: readonly unknown[], options: JoinedOptions = {}): TemplateResult {
   if (parts.length < 2) return html`${parts[0] ?? nothing}`;
   return html`<span class="joined ${options.whole ? "whole" : ""}">${parts.map(
-    (part, i) => html`${i ? html`<span class="joined-sep"> · </span>` : nothing}<span class="joined-part">${part}</span>`,
+    (part, i) => html`${i ? html`<span class="joined-sep"><span class="joined-dot">\u00a0·</span> </span>` : nothing}<span class="joined-part">${part}</span>`,
   )}</span>`;
 }
 
@@ -36,21 +37,31 @@ export function fitJoined(root: ParentNode, key: string): void {
   root.querySelectorAll<HTMLElement>(".joined").forEach((el) => {
     const fit = `${key}|${el.textContent}`;
     if (el.dataset.fit === fit) return;
-    el.classList.remove("stacked", "flow");
-    const parts = el.querySelectorAll<HTMLElement>(":scope > .joined-part");
-    const first = parts[0]?.getBoundingClientRect();
-    const last = parts[parts.length - 1]?.getBoundingClientRect();
-    if (!first || !last || !first.width) {
+    el.classList.remove("stacked", "flow", "probe");
+    const seps = [...el.querySelectorAll<HTMLElement>(":scope > .joined-sep")];
+    seps.forEach((sep) => sep.classList.remove("break"));
+    const parts = [...el.querySelectorAll<HTMLElement>(":scope > .joined-part")];
+    const tops = parts.map((part) => part.getBoundingClientRect());
+    if (!tops.length || !tops[0].width) {
       delete el.dataset.fit;
       return;
     }
     el.dataset.fit = fit;
-    if (last.top <= first.top + 1) return;
-    el.classList.add("stacked");
-    // A part longer than its own line would leave an orphan line: one flowing text instead.
-    if (!el.classList.contains("whole") && [...parts].some((part) => part.scrollWidth > part.clientWidth + 0.5)) {
-      el.classList.replace("stacked", "flow");
+    // Where the browser started a new line, the dot in front of that part becomes the line break.
+    const breaks = seps.filter((_, i) => tops[i + 1].top > tops[i].top + 1);
+    if (!breaks.length) return;
+    if (!el.classList.contains("whole")) {
+      // A part longer than its own line would leave an orphan line: one flowing text instead.
+      el.classList.add("probe");
+      const long = parts.some((part) => part.scrollWidth > part.clientWidth + 0.5);
+      el.classList.remove("probe");
+      if (long) {
+        el.classList.add("flow");
+        return;
+      }
     }
+    el.classList.add("stacked");
+    breaks.forEach((sep) => sep.classList.add("break"));
   });
 }
 
@@ -64,18 +75,31 @@ export const joinedStyles = css`
     white-space: nowrap;
   }
 
-  .joined-only,
-  .joined.stacked .joined-sep {
+  .joined-only {
     display: none;
-  }
-
-  .joined.stacked,
-  .joined.stacked .joined-part {
-    display: block;
   }
 
   .joined.stacked .joined-only {
     display: inline;
+  }
+
+  /* Where the line breaks the dot goes; the space stays, so a copied or read text keeps its words apart. */
+  .joined.stacked .joined-sep.break .joined-dot {
+    display: none;
+  }
+
+  .joined.stacked .joined-sep.break::after {
+    content: "\\A";
+    white-space: pre;
+  }
+
+  /* Measuring only: every part on its own line. */
+  .joined.probe {
+    display: block;
+  }
+
+  .joined.probe .joined-part {
+    display: block;
   }
 
   .joined.flow .joined-part {
