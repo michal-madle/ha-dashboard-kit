@@ -56,3 +56,30 @@ test("víc částí: zalomí se jen v místě tečky, tečky uvnitř řádku zů
   // the text for copying and for the screen reader has no dot at the break
   expect(await page.locator("#three").evaluate((el: HTMLElement) => el.innerText.replace(/\s+/g, " ").trim())).toBe("12:00 · 3,2 kW nabíjí");
 });
+
+test("souvislý text na každé šířce od 100 do 300 px: tečka nikdy nezačíná ani nekončí řádek", async ({ page }) => {
+  await at(page, 300);
+  const bad = await page.locator("joined-test").evaluate(async (host: any) => {
+    const found: string[] = [];
+    const firstText = (part: Element) => { const walker = document.createTreeWalker(part, NodeFilter.SHOW_TEXT); let node = walker.nextNode(); while (node && !node.textContent!.trim()) node = walker.nextNode(); return node as Text; };
+    const top = (node: Text, from: number, to: number) => { const r = document.createRange(); r.setStart(node, from); r.setEnd(node, to); return Math.round(r.getBoundingClientRect().top); };
+    for (let w = 100; w <= 300; w++) {
+      host.width = w;
+      await host.updateComplete;
+      for (const el of host.renderRoot.querySelectorAll(".joined")) {
+        const parts = [...el.querySelectorAll(":scope > .joined-part")];
+        el.querySelectorAll(":scope > .joined-sep").forEach((sep: HTMLElement, i: number) => {
+          const dot = sep.querySelector(".joined-dot") as HTMLElement;
+          if (getComputedStyle(dot).display === "none") return; // the dot became the line break
+          const b = firstText(parts[i + 1]);
+          const shown = (x: Node) => !!x.textContent!.trim() && (x.parentElement?.getClientRects().length ?? 0) > 0;
+          const lastA = (() => { const walker = document.createTreeWalker(parts[i], NodeFilter.SHOW_TEXT); let n: Text | null = null; for (let x = walker.nextNode(); x; x = walker.nextNode()) if (shown(x)) n = x as Text; return n!; })();
+          const d = Math.round(dot.getBoundingClientRect().top);
+          if (top(lastA, lastA.length - 1, lastA.length) !== d || top(b, 0, 1) !== d) found.push(`${w} px: ${el.parentElement!.id}`);
+        });
+      }
+    }
+    return found;
+  });
+  expect(bad).toEqual([]);
+});
