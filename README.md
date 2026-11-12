@@ -20,7 +20,7 @@ Společné stavební kameny Lovelace karet pro Home Assistant, které dělám: [
 
 ## Agenti a UX systém
 
-Agenti pro obě karty jsou jen tady (`.claude/agents/`), společná pravidla a postup v [AGENTS.md](./AGENTS.md), UX systém a společný vizuální a UI jazyk obou karet v [DASHBOARD_UX_SYSTEM.md](./DASHBOARD_UX_SYSTEM.md). Karta má jen svůj `AGENTS.md` s omezeními. Session se spouští v kitu s oběma kartami a se soukromým repozitářem `ha-config` (exporty entit, konfigurace Home Assistantu, týdenní ladění; postup v `AGENTS.md`).
+Agenti, společná pravidla a postup, UX systém a společný vizuální a UI jazyk obou karet jsou v soukromém repozitáři `ha-config` (`.claude/agents/`, `AGENTS.md`, `DASHBOARD_UX_SYSTEM.md`).
 
 ## Použití v kartě
 
@@ -86,4 +86,4 @@ npm test          # tsc --noEmit, vitest, Playwright (tests/harness.html přes V
 npm run check     # jen typy
 ```
 
-Pravidla dokumentace (jen ověřené a potvrzené, otázky v chatu, `DESIGN_HISTORY.md` kitu i karet v `ha-config`) jsou v [AGENTS.md](./AGENTS.md#dokumentace-rozhodnutí-uživatele-2-11-2026); kontrola dokumentace: `node tools/check-docs.mjs <adresář repozitáře>`. Návod na připojení Claude k Home Assistantu je v [AI_MCP.md](./AI_MCP.md).
+Pravidla dokumentace (jen ověřené a potvrzené, otázky v chatu, `DESIGN_HISTORY.md` kitu i karet) a kontrola dokumentace (`tools/check-docs.mjs`) jsou v soukromém repozitáři `ha-config`.
