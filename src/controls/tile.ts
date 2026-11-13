@@ -109,6 +109,9 @@ export class HdkTile extends LitElement {
         :host([pending]) button {
           animation: none;
           background: var(--hdk-tile-mixed, #17395d);
+          /* Not by colour alone: a dashed accent outline marks the command on its way. */
+          outline: 1.5px dashed var(--hdk-tile-on, #0a6ed1);
+          outline-offset: -1.5px;
         }
       }
       .name {
