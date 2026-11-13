@@ -106,6 +106,12 @@ export const joinedStyles = css`
     white-space: normal;
   }
 
+  /* A part on its own line that is still too long (measured before the font or the width settled, iPhone) wraps
+     rather than pushing the card wider than the screen. */
+  .joined.stacked .joined-part {
+    white-space: normal;
+  }
+
   .joined.flow .joined-sep {
     white-space: nowrap;
   }
