@@ -8,6 +8,7 @@
     "./types": "./src/types.ts",
     "./i18n": "./src/i18n.ts",
     "./entities": "./src/entities.ts",
+    "./runstart": "./src/runstart.ts",
     "./config": "./src/config.ts",
     "./gesture": "./src/gesture.ts",
     "./joined": "./src/joined.ts",
