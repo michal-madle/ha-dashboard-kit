@@ -356,7 +356,7 @@ export class HdkClimate extends LitElement {
             )}
           </div>`}
       ${mixedModes ? html`<div class="note">${joinedText(t.mixedModes(this.selected.map((id) => `${this.name(id)}\u00a0${t.modes[modeOf(this.system, hass?.states[id]) ?? "off"] ?? ""}`).join(" · ")))}</div>` : nothing}
-      ${different || mixedModes ? html`<div class="note">${t.firstChange}</div>` : nothing}
+      ${(different || mixedModes) && !Object.keys(this.draft).length ? html`<div class="note">${t.firstChange}</div>` : nothing}
       ${this.system === "heating" ? this.renderManualFor(mode) : this.renderOffAfter(mode)}
       ${this.error ? html`<div class="error" role="alert">${this.error}</div>` : nothing}
     `;
