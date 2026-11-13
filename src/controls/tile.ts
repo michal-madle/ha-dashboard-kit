@@ -33,6 +33,8 @@ export class HdkTile extends LitElement {
   /** One line with the name in the middle (a preset), without the state line. */
   @property({ type: Boolean, reflect: true }) centered = false;
   @property({ type: Boolean }) disabled = false;
+  /** A command of this tile is on its way (`Pending`): the tile pulses towards the accent until it arrives. */
+  @property({ type: Boolean, reflect: true }) pending = false;
   /** An `action` tile that is the chosen option (a preset, a mode, a selected room): said by `aria-pressed`, not by colour alone. */
   @property({ type: Boolean }) pressed?: boolean;
   /** Spoken name; without it the visible text (name, state, count). */
@@ -92,6 +94,22 @@ export class HdkTile extends LitElement {
       }
       :host([state="mixed"]) button {
         background: var(--hdk-tile-mixed, #17395d);
+      }
+      /* Sent and on its way: the fill goes between its own and the accent until Home Assistant reports the result. */
+      :host([pending]) button {
+        animation: hdk-pending 1.3s ease-in-out infinite alternate;
+      }
+      @keyframes hdk-pending {
+        to {
+          background: var(--hdk-tile-on, #0a6ed1);
+          color: var(--hdk-tile-on-text, #fff);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        :host([pending]) button {
+          animation: none;
+          background: var(--hdk-tile-mixed, #17395d);
+        }
       }
       .name {
         display: flex;
@@ -200,6 +218,7 @@ export class HdkTile extends LitElement {
         class=${this.hints.nudge ? "nudge" : ""}
         aria-checked=${toggle ? (this.state === "on" ? "true" : "false") : nothing}
         aria-pressed=${this.kind === "action" && this.pressed !== undefined ? (this.pressed ? "true" : "false") : nothing}
+        aria-busy=${this.pending ? "true" : nothing}
         aria-haspopup=${this.kind === "open" ? "dialog" : nothing}
         aria-label=${this.label || nothing}
         ?disabled=${this.disabled}
