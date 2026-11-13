@@ -55,7 +55,10 @@ export class HdkTile extends LitElement {
       }
       button {
         position: relative;
-        display: block;
+        /* The name starts at the top in every tile of a row, whatever the height of the tallest one. */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
         box-sizing: border-box;
         width: 100%;
         height: 100%;
@@ -115,7 +118,7 @@ export class HdkTile extends LitElement {
         color: var(--hdk-tile-on-sub, #fff);
       }
       :host([centered]) button {
-        display: flex;
+        flex-direction: row;
         align-items: center;
         justify-content: center;
         gap: 8px;
