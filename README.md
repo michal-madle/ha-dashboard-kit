@@ -66,6 +66,8 @@ import { defineControls } from "ha-dashboard-kit/controls";
 defineControls("ed"); // <ed-switch>, <ed-segmented>, <ed-slider>, <ed-ring>, <ed-tile>, <ed-sheet>
 ```
 
+Popup Topení / Klimatizace: `import { defineClimate } from "ha-dashboard-kit/climate"; defineClimate("ed");` (po `defineControls`) dá `<ed-climate>` do listu `<ed-sheet>`; karta mu dá `hass`, `i18n`, `texts` (všechny texty v jazyce karty), `system`, `rooms`, `selected` a při zavření listu zavolá `flush()`.
+
 Barvy prvků karta namapuje na `--hdk-*` (seznam ve spec kitu `CURRENT_SPEC.md`, oddíl Ovládací prvky); události prvků jsou `hdk-toggle`, `hdk-select`, `hdk-input`, `hdk-change`, `hdk-press`, `hdk-open` a `hdk-close` (list odspodu).
 
 Testy karty: `tests/server.mjs` volá `startServer`, `playwright.config.ts` volá `cardPlaywrightConfig`, `tests/fixtures.ts` volá `makeTest`, `tests/coverage.mjs` volá `runCoverage` (příklady v hlavičkách souborů ve složce `testing/`).

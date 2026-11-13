@@ -32,6 +32,8 @@ export class HdkTile extends LitElement {
   /** One line with the name in the middle (a preset), without the state line. */
   @property({ type: Boolean, reflect: true }) centered = false;
   @property({ type: Boolean }) disabled = false;
+  /** An `action` tile that is the chosen option (a preset, a mode, a selected room): said by `aria-pressed`, not by colour alone. */
+  @property({ type: Boolean }) pressed?: boolean;
   /** Spoken name; without it the visible text (name, state, count). */
   @property() label = "";
   @property({ type: Boolean }) guarded = false;
@@ -190,6 +192,7 @@ export class HdkTile extends LitElement {
         role=${toggle ? "switch" : "button"}
         class=${this.hints.nudge ? "nudge" : ""}
         aria-checked=${toggle ? (this.state === "on" ? "true" : "false") : nothing}
+        aria-pressed=${this.kind === "action" && this.pressed !== undefined ? (this.pressed ? "true" : "false") : nothing}
         aria-haspopup=${this.kind === "open" ? "dialog" : nothing}
         aria-label=${this.label || nothing}
         ?disabled=${this.disabled}

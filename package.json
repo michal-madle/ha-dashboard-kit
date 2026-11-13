@@ -1,6 +1,6 @@
 {
   "name": "ha-dashboard-kit",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Shared building blocks of the Home Assistant Lovelace cards of Michal Madle (Klima, Energie)",
   "private": true,
   "type": "module",
@@ -13,6 +13,7 @@
     "./gesture": "./src/gesture.ts",
     "./joined": "./src/joined.ts",
     "./controls": "./src/controls/index.ts",
+    "./climate": "./src/climate/index.ts",
     "./tsconfig.base.json": "./tsconfig.base.json",
     "./build/vite.mjs": { "types": "./build/vite.d.mts", "default": "./build/vite.mjs" },
     "./build/copy-build.mjs": "./build/copy-build.mjs",

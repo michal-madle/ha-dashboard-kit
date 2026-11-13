@@ -23,6 +23,12 @@ export class HdkSlider extends LitElement {
   @property() minLabel = "";
   @property() maxLabel = "";
   @property({ type: Boolean }) disabled = false;
+  /**
+   * Different values (CURRENT_SPEC.md, Popup Topení / Klimatizace: „posuvník nemá jezdec“): no thumb and no fill, a mark
+   * at each value of `marks`; the first touch sets the value (and fires as usual).
+   */
+  @property({ type: Boolean, reflect: true }) mixed = false;
+  @property({ attribute: false }) marks: number[] = [];
 
   @state() private _drag?: number;
 
@@ -88,6 +94,32 @@ export class HdkSlider extends LitElement {
       background: #fff;
       box-shadow: 0 2px 6px rgb(0 0 0 / 40%);
     }
+    :host([mixed]) input::-webkit-slider-thumb {
+      opacity: 0;
+    }
+    :host([mixed]) input::-moz-range-thumb {
+      opacity: 0;
+    }
+    :host([mixed]) input::-moz-range-progress {
+      background: transparent;
+    }
+    .marks {
+      position: absolute;
+      left: 33px;
+      right: 33px;
+      top: 16px;
+      height: 20px;
+      pointer-events: none;
+    }
+    .marks i {
+      position: absolute;
+      top: 0;
+      margin-left: -1.5px;
+      width: 3px;
+      height: 20px;
+      border-radius: 1.5px;
+      background: var(--hdk-accent, #0a84ff);
+    }
     input:focus-visible {
       outline: 2px solid var(--hdk-accent, #0a84ff);
       outline-offset: 2px;
@@ -125,7 +157,8 @@ export class HdkSlider extends LitElement {
     const span = this.max - this.min || 1;
     const fraction = Math.max(0, Math.min(1, (shown - this.min) / span));
     // The fill ends under the thumb centre: the thumb centre moves over the track width minus the thumb width.
-    const fill = `calc(19px + (100% - 38px) * ${fraction})`;
+    const fill = this.mixed && this._drag === undefined ? "0%" : `calc(19px + (100% - 38px) * ${fraction})`;
+    const marks = this.mixed && this._drag === undefined ? this.marks.map((mark) => html`<i style="left:${((Math.max(0, Math.min(1, (mark - this.min) / span))) * 100).toFixed(2)}%"></i>`) : [];
     const every = this.tickStep || this.step || 1;
     const count = Math.floor(span / every + 1e-9) + 1;
     const ticks = count >= 2 && count <= 40 ? Array.from({ length: count }, (_, k) => html`<i style="left:${(((k * every) / span) * 100).toFixed(2)}%"></i>`) : [];
@@ -144,6 +177,7 @@ export class HdkSlider extends LitElement {
           @change=${this.onChange}
         />
         <div class="ticks" aria-hidden="true">${ticks}</div>
+        ${marks.length ? html`<div class="marks" aria-hidden="true">${marks}</div>` : null}
       </div>
       ${this.minLabel || this.maxLabel ? html`<div class="ends" aria-hidden="true"><span>${this.minLabel}</span><span>${this.maxLabel}</span></div>` : null}`;
   }
