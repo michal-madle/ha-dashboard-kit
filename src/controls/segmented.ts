@@ -77,8 +77,8 @@ export class HdkSegmented extends LitElement {
       }
       .track.wrap button {
         padding: 0 4px;
-        font-size: 15px;
-        line-height: 20px;
+        font-size: 13px;
+        line-height: 17px;
         text-align: center;
       }
       /* A control that cannot be used now does not look chosen: the thumb fades with the labels. */
