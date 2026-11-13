@@ -91,15 +91,16 @@ export class HdkSheet extends LitElement {
       gap: 8px;
       margin-bottom: 12px;
     }
+    /* The type scale of DASHBOARD_UX_SYSTEM.md (Písmo): Title 2 22/28 and Subhead 15/20 (uživatel 13. 11. 2026: „Q209 ano“). */
     h2 {
       margin: 0;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 600;
-      line-height: 26px;
+      line-height: 28px;
     }
     .sub {
       color: var(--hdk-secondary, #9a9aa0);
-      font-size: 14px;
+      font-size: 15px;
       line-height: 20px;
     }
     .close {
