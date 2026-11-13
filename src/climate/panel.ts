@@ -432,7 +432,6 @@ export class HdkClimate extends LitElement {
         label: title,
         options: choices.map((item): SegmentOption => ({ value: item, label: names[item] ?? item })),
         value,
-        wrap: true,
         onSelect: (next: string) => this.change(kind === "fan" ? { fan: next } : { swing: next }),
       })}`;
   }
