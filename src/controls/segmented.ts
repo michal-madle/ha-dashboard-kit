@@ -28,6 +28,8 @@ export class HdkSegmented extends LitElement {
   @property() label = "";
   @property({ type: Boolean }) disabled = false;
   @property({ type: Boolean }) compact = false;
+  /** Labels may take two lines (a 66 px capsule with a narrower padding), e.g. „Do změny plánu“ beside „1 h“. */
+  @property({ type: Boolean }) wrap = false;
   @property({ type: Boolean }) guarded = false;
   @property({ type: Number }) holdMs = 550;
   @property({ type: Number }) doubleTapMs = 400;
@@ -72,6 +74,16 @@ export class HdkSegmented extends LitElement {
       }
       .track.tall {
         min-height: 66px;
+      }
+      .track.wrap button {
+        padding: 0 4px;
+        line-height: 20px;
+        text-align: center;
+      }
+      /* A control that cannot be used now does not look chosen: the thumb fades with the labels. */
+      .track.off .thumb {
+        opacity: 0.5;
+        box-shadow: none;
       }
       .thumb {
         position: absolute;
@@ -172,7 +184,7 @@ export class HdkSegmented extends LitElement {
     const nudge = this.hints.nudge && !calm ? Math.sign(this.nudgeIndex - index) * 14 : 0;
     const dx = this._dragging ? this._dx : nudge;
     return html`<div
-        class="track ${this.compact ? "compact" : ""} ${this.guarded ? "guarded" : ""} ${this._dragging ? "dragging" : ""} ${this.options.some((option) => option.detail) ? "tall" : ""}"
+        class="track ${this.compact ? "compact" : ""} ${this.guarded ? "guarded" : ""} ${this._dragging ? "dragging" : ""} ${this.options.some((option) => option.detail) || this.wrap ? "tall" : ""} ${this.wrap ? "wrap" : ""} ${this.disabled ? "off" : ""}"
         role="radiogroup"
         aria-label=${this.label}
         style="--n:${Math.max(1, this.options.length)};--i:${Math.max(0, index)};--dx:${dx}px"

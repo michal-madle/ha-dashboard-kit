@@ -3,6 +3,7 @@ import { property } from "lit/decorators.js";
 import type { TemplateResult } from "lit";
 import { HoldOrDoubleTap } from "../gesture";
 import { HintState, hintStyles } from "./hint";
+import { fitJoined, joinedStyles, joinedText } from "../joined";
 
 export type TileState = "off" | "idle" | "on" | "mixed";
 export type TileKind = "toggle" | "action" | "open";
@@ -49,6 +50,7 @@ export class HdkTile extends LitElement {
 
   static styles = [
     hintStyles,
+    joinedStyles,
     css`
       :host {
         position: relative;
@@ -178,6 +180,11 @@ export class HdkTile extends LitElement {
     `,
   ];
 
+  /** The state line is text from parts („WindFree · 24°“): it breaks only at the dot, and the dot goes (Text z částí). */
+  protected updated(): void {
+    fitJoined(this.renderRoot, String(Math.round(this.getBoundingClientRect().width)));
+  }
+
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.gesture.dispose();
@@ -204,7 +211,7 @@ export class HdkTile extends LitElement {
         @contextmenu=${(event: Event) => this.protected && event.preventDefault()}
       ><span class="name"><span>${this.name}</span>${this.kind === "open" ? html`<span class="chevron" aria-hidden="true">›</span>` : null}</span>${this.centered
           ? count
-          : html`<span class="text">${this.text}${count}</span>`}</button>
+          : html`<span class="text">${joinedText(this.text)}${count}</span>`}</button>
       <span class="sr" aria-live="polite">${this.hints.hint ? this.hint : ""}</span>
       ${this.hints.hint
         ? html`<div class="hint above ${this.hintAlign}" aria-hidden="true"><i></i><span style="position: relative">${this.hint}</span></div>`

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { axeViolations } from "../testing/helpers.mjs";
+import { axeViolations, joinedLines } from "../testing/helpers.mjs";
 
 // CURRENT_SPEC.md kitu, Popup Topení / Klimatizace.
 
@@ -35,7 +35,10 @@ test("klepnutí na zapnutou vybere všechny zapnuté, na vypnutou všechny vypnu
   await expect(big(page)).toHaveText("22–24°");
   await expect(page.locator("kit-climate .sub")).toHaveText("Cíl: Obývák 22° · Ložnice 24°");
   expect(await page.locator("kit-slider").evaluate((slider: any) => [slider.mixed, slider.marks])).toEqual([true, [22, 24]]);
-  await expect(page.locator("kit-climate .note")).toContainText("Různé režimy: Obývák Chlazení · Ložnice WindFree");
+  const notes = page.locator("kit-climate .note");
+  // Text z částí: zalomí se jen v místě tečky.
+  expect((await joinedLines(notes.first())).join(" · ")).toBe("Různé režimy: Obývák Chlazení · Ložnice WindFree");
+  await expect(notes.nth(1)).toHaveText("První změna nastaví všechny vybrané stejně.");
   await room(page, "Maxík").click();
   expect(await page.evaluate(() => (window as any).climate.selected)).toEqual(["climate.c", "climate.d"]);
   expect(await calls(page)).toEqual([]);
@@ -85,6 +88,17 @@ test("topení: půl stupně, posunutí teploty z Plánu je Ručně do změny pl�
   await page.locator("kit-segmented").first().getByRole("radio", { name: "Boost" }).click();
   await page.evaluate(() => (window as any).climate.flush());
   expect((await calls(page))[1].data).toEqual({ entity_id: "climate.a", temperature: 25, time_period: "01:00:00" });
+});
+
+test("bez akce Tado CE není „Ručně platí“ ani Boost; neaktivní segment má ztlumený jezdec; dvě běžící klimatizace v různých režimech mají Vypnout za", async ({ page }) => {
+  await open(page, "system=heating&notimer=1");
+  await expect(page.locator("kit-climate h3")).toHaveText(["Režim"]);
+  await expect(page.locator("kit-segmented").getByRole("radio")).toHaveText(["Plán", "Ručně", "Vypnuto"]);
+  await open(page, "system=heating");
+  const thumb = page.locator("kit-segmented").nth(1).locator(".thumb");
+  expect(await thumb.evaluate((el) => getComputedStyle(el).opacity)).toBe("0.5");
+  await open(page, "selected=climate.a,climate.b");
+  await expect(page.locator("kit-segmented").getByRole("radio", { name: "3 h" })).toBeEnabled();
 });
 
 test("320 px bez vodorovného posouvání a axe bez porušení (oba systémy)", async ({ page }) => {

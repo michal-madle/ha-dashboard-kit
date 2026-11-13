@@ -5,6 +5,7 @@ import type { PropertyValues, TemplateResult } from "lit";
 import type { I18n } from "../i18n";
 import type { EntityId, HomeAssistant } from "../types";
 import type { SegmentOption } from "../controls/segmented";
+import { fitJoined, joinedStyles, joinedText } from "../joined";
 import {
   COOLING_MODES,
   HEATING_MODES,
@@ -83,7 +84,11 @@ export class HdkClimate extends LitElement {
   @state() private error = "";
   private timer?: number;
 
-  static styles = css`
+  protected updated(): void {
+    fitJoined(this.renderRoot, String(Math.round(this.getBoundingClientRect().width)));
+  }
+
+  static styles = [joinedStyles, css`
     :host {
       display: block;
     }
@@ -168,7 +173,7 @@ export class HdkClimate extends LitElement {
       font-size: 15px;
       line-height: 20px;
     }
-  `;
+  `];
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
@@ -350,19 +355,18 @@ export class HdkClimate extends LitElement {
               }),
             )}
           </div>`}
-      ${mixedModes
-        ? html`<div class="note">${t.mixedModes(this.selected.map((id) => `${this.name(id)} ${t.modes[modeOf(this.system, hass?.states[id]) ?? "off"] ?? ""}`).join(" · "))}</div>`
-        : different || mixedModes
-          ? html`<div class="note">${t.firstChange}</div>`
-          : nothing}
+      ${mixedModes ? html`<div class="note">${joinedText(t.mixedModes(this.selected.map((id) => `${this.name(id)}\u00a0${t.modes[modeOf(this.system, hass?.states[id]) ?? "off"] ?? ""}`).join(" · ")))}</div>` : nothing}
+      ${different || mixedModes ? html`<div class="note">${t.firstChange}</div>` : nothing}
       ${this.system === "heating" ? this.renderManualFor(mode) : this.renderOffAfter(mode)}
       ${this.error ? html`<div class="error" role="alert">${this.error}</div>` : nothing}
     `;
   }
 
-  private renderManualFor(mode: ClimateMode | undefined): TemplateResult {
+  private renderManualFor(mode: ClimateMode | undefined): TemplateResult | typeof nothing {
     const t = this.texts!;
-    const usable = (mode === "manual" || mode === "boost") && heatingTimer(this.hass);
+    // Without the timer of Tado CE the duration cannot be sent: no section, as Boost is not offered either.
+    if (!heatingTimer(this.hass)) return nothing;
+    const usable = mode === "manual" || mode === "boost";
     const value = this.draft.manualFor ?? (mode === "boost" ? "60" : "next");
     const minutes = Number(value);
     const footer = !usable ? "" : value === "next" ? t.untilNextPlan : value === "forever" ? t.untilChanged : t.untilTime(this.i18n!.time(Date.now() + minutes * 60000));
@@ -372,6 +376,7 @@ export class HdkClimate extends LitElement {
         options: MANUAL_FOR.map((item): SegmentOption => ({ value: item, label: t.manualForChoices[item] })),
         value,
         disabled: !usable,
+        wrap: true,
         onSelect: (next: string) => this.change({ manualFor: next as ManualFor, ...(this.draft.mode === undefined && mode ? { mode } : {}) }),
       })}
       <div class="footer">${footer}</div>`;
@@ -380,7 +385,8 @@ export class HdkClimate extends LitElement {
   private renderOffAfter(mode: ClimateMode | undefined): TemplateResult {
     const t = this.texts!;
     const value = this.draft.offAfter ?? 0;
-    const running = mode !== undefined && mode !== "off";
+    // Every selected air conditioner runs (also in different modes), or the popup switches it on now.
+    const running = mode !== undefined ? mode !== "off" : this.selected.length > 0 && this.selected.every((id) => isOn(this.system, this.hass?.states[id]) === true);
     const footer = !running ? "" : value === 0 ? t.runsUntilOff : t.offAt(this.i18n!.time(Date.now() + value * 60000));
     return html`<h3>${t.offAfter}</h3>
       ${segmented(this.prefix, {
@@ -414,13 +420,14 @@ function tile(prefix: string, props: { name: string; text?: string; state: strin
 }
 
 /** A segmented control of the kit; a choice calls `onSelect`. */
-function segmented(prefix: string, props: { label: string; options: SegmentOption[]; value: string; disabled?: boolean; onSelect: (value: string) => void }): TemplateResult {
+function segmented(prefix: string, props: { label: string; options: SegmentOption[]; value: string; disabled?: boolean; wrap?: boolean; onSelect: (value: string) => void }): TemplateResult {
   const tag = unsafeStatic(`${prefix}-segmented`);
   return staticHtml`<${tag}
     .label=${props.label}
     .options=${props.options}
     .value=${props.value}
     .disabled=${props.disabled ?? false}
+    ?wrap=${props.wrap ?? false}
     @hdk-select=${(event: CustomEvent<{ value: string }>) => {
       event.stopPropagation();
       props.onSelect(event.detail.value);

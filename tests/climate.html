@@ -23,7 +23,7 @@
       ? { "climate.a": e("cool", { ...ac, temperature: 22, current_temperature: 23.4 }), "climate.b": e("cool", { ...ac, temperature: 24, preset_mode: "wind_free", current_temperature: 24.1 }), "climate.c": e("off", { ...ac, temperature: 22 }), "climate.d": e("off", { ...ac, temperature: 22 }) }
       : { "climate.a": e("auto", { ...tado, temperature: 21, current_temperature: 21.6 }), "climate.b": e("heat", { ...tado, temperature: 22.5, current_temperature: 21.6, hvac_action: "heating" }), "climate.c": e("off", { ...tado, temperature: 5 }) };
     window.calls = [];
-    const hass = { states, services: { tado_ce: { set_climate_timer: {} } }, callService: async (domain, service, data) => { window.calls.push({ domain, service, data }); }, callWS: async (message) => { window.calls.push({ ws: message }); } };
+    const hass = { states, services: params.get("notimer") ? {} : { tado_ce: { set_climate_timer: {} } }, callService: async (domain, service, data) => { window.calls.push({ domain, service, data }); }, callWS: async (message) => { window.calls.push({ ws: message }); } };
     const modes = { plan: "Plán", manual: "Ručně", boost: "Boost", off: "Vypnuto", cool: "Chlazení", wind_free: "WindFree", heat: "Topení", fan_only: "Větrání", dry: "Sušení", auto: "Auto", sleep: "Spánek" };
     const texts = {
       rooms: "Místnosti", temperature: "Cílová teplota", mode: "Režim", modes, unavailable: "Nedostupné",
