@@ -57,6 +57,20 @@ describe("RunStarts: doba od skutečného začátku", () => {
     expect(callWS).toHaveBeenCalledTimes(1);
   });
 
+  it("překreslení během dotazu se neptá znovu (dříve nekonečná smyčka dotazů)", async () => {
+    const { hass, callWS } = fakeHass({ "input_boolean.pracka": { state: "on", last_changed: restart } }, { "input_boolean.pracka": [{ s: "on", lu: t(10) / 1000 }] });
+    let starts: RunStarts;
+    // Karta se překreslí při každé odpovědi i mezi tím, než odpověď přijde.
+    const render = () => starts.of(hass, "input_boolean.pracka");
+    starts = new RunStarts(render, () => t(10, 30));
+    render();
+    await Promise.resolve();
+    render();
+    for (let i = 0; i < 5; i++) await tick();
+    expect(callWS).toHaveBeenCalledTimes(1);
+    expect(render()).toBe(t(10));
+  });
+
   it("jeden dotaz na všechny entity jednoho vykreslení, okno je posledních 7 dní", async () => {
     const { hass, callWS } = fakeHass(
       { "a.x": { state: "on", last_changed: restart }, "b.y": { state: "open", last_changed: restart } },

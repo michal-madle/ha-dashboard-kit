@@ -57,6 +57,8 @@ interface Known {
 export class RunStarts {
   private readonly known = new Map<string, Known>();
   private readonly wanted = new Map<string, string>();
+  /** Lookups on the way: a render while the request runs must not ask again (that looped without end). */
+  private readonly pending = new Map<string, string>();
   private hass?: HomeAssistant;
   private scheduled = false;
 
@@ -75,7 +77,7 @@ export class RunStarts {
     if (known?.key === key) return known.start === undefined ? changed : Math.min(known.start, changed ?? known.start);
     this.hass = hass;
     // Only when the state could have been older than its last_changed: always, a restart is not visible in the state.
-    if (this.wanted.get(id) !== key) {
+    if (this.wanted.get(id) !== key && this.pending.get(id) !== key) {
       this.wanted.set(id, key);
       this.schedule();
     }
@@ -94,6 +96,7 @@ export class RunStarts {
     const asked = new Map(this.wanted);
     this.wanted.clear();
     if (!hass || !asked.size) return;
+    for (const [id, key] of asked) this.pending.set(id, key);
     const end = this.now();
     let rows: Record<string, RawHistoryRow[]> | null | undefined;
     try {
@@ -111,6 +114,7 @@ export class RunStarts {
       rows = undefined;
     }
     for (const [id, key] of asked) {
+      if (this.pending.get(id) === key) this.pending.delete(id);
       // The state moved on while the request ran: the next render asks again.
       if (this.wanted.has(id)) continue;
       const run = lastRun(rows?.[id]);
