@@ -43,6 +43,8 @@
       <kit-tile id="t-free" name="Stín" state="idle" kind="action" centered></kit-tile>
       <kit-tile id="t-dis" name="Tma" state="idle" kind="action" centered disabled></kit-tile>
     </div>
+    <button id="open-sheet" type="button" style="min-height:44px">Open sheet</button>
+    <kit-sheet id="sheet" heading="Žaluzie" sub="4 místnosti" closeLabel="Zavřít"><button id="in-a" type="button">A</button><kit-tile id="in-tile" name="Den" kind="action" centered></kit-tile></kit-sheet>
   </main>
   <script type="module">
     import { defineControls } from "/src/controls/index.ts";
@@ -51,7 +53,10 @@
     const options = [{ value: "a", label: "Surplus" }, { value: "b", label: "Boost" }];
     for (const id of ["seg", "free"]) document.getElementById(id).options = options;
     window.events = [];
-    for (const type of ["hdk-toggle", "hdk-select", "hdk-change", "hdk-input", "hdk-press", "hdk-open"]) {
+    const sheet = document.getElementById("sheet");
+    document.getElementById("open-sheet").addEventListener("click", () => (sheet.open = true));
+    sheet.addEventListener("hdk-close", () => (sheet.open = false));
+    for (const type of ["hdk-close", "hdk-toggle", "hdk-select", "hdk-change", "hdk-input", "hdk-press", "hdk-open"]) {
       document.addEventListener(type, (event) => window.events.push({ type, id: event.target.id, detail: event.detail }));
     }
     window.ready = true;

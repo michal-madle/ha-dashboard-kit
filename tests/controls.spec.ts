@@ -12,8 +12,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("registrace je idempotentní: dvojí defineControls nespadne a prvky jsou definované", async ({ page }) => {
-  const defined = await page.evaluate(() => ["kit-switch", "kit-segmented", "kit-slider", "kit-ring", "kit-tile"].map((name) => !!customElements.get(name)));
-  expect(defined).toEqual([true, true, true, true, true]);
+  const defined = await page.evaluate(() => ["kit-switch", "kit-segmented", "kit-slider", "kit-ring", "kit-tile", "kit-sheet"].map((name) => !!customElements.get(name)));
+  expect(defined).toEqual([true, true, true, true, true, true]);
 });
 
 test("nechráněný přepínač přepne jedním klepnutím", async ({ page }) => {
@@ -228,5 +228,77 @@ test.describe("dlaždice (CURRENT_SPEC.md, Ovládací prvky, Dlaždice)", () => 
       expect(item.w).toBeGreaterThanOrEqual(44);
     }
     expect(await axeViolations(page)).toEqual([]);
+  });
+});
+
+test.describe("list odspodu (CURRENT_SPEC.md, Ovládací prvky, List odspodu)", () => {
+  const open = async (page: Page) => {
+    await page.setViewportSize({ width: 393, height: 852 });
+    await page.locator("#open-sheet").click();
+    await expect(page.getByRole("dialog", { name: "Žaluzie" })).toBeVisible();
+  };
+  const closes = async (page: Page) => (await events(page)).filter((event) => event.type === "hdk-close").length;
+
+  test("otevře se odspodu s nadpisem a druhým řádkem, fokus je v listu, stránka pod ním se nehne", async ({ page }) => {
+    const before = await page.locator("#tiles").boundingBox();
+    await open(page);
+    const bottom = async () => {
+      const box = (await page.locator("#sheet").getByRole("dialog").boundingBox())!;
+      return Math.round(box.y + box.height);
+    };
+    await expect.poll(bottom).toBe(852);
+    await expect(page.locator("#sheet").getByText("4 místnosti")).toBeVisible();
+    expect(await page.locator("#tiles").boundingBox()).toEqual(before);
+    expect(await page.evaluate(() => document.querySelector("#sheet")!.shadowRoot!.activeElement?.getAttribute("role"))).toBe("dialog");
+  });
+
+  test("zavře ho ✕, klepnutí vedle, Escape i stažení dolů; klepnutí do listu ne; fokus se vrátí", async ({ page }) => {
+    await open(page);
+    await page.locator("#in-a").click();
+    expect(await closes(page)).toBe(0);
+    await page.getByRole("button", { name: "Zavřít" }).click();
+    expect(await closes(page)).toBe(1);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe("open-sheet");
+    await open(page);
+    await page.mouse.click(200, 40);
+    expect(await closes(page)).toBe(2);
+    await open(page);
+    await page.keyboard.press("Escape");
+    expect(await closes(page)).toBe(3);
+    await open(page);
+    const grabber = (await page.locator("#sheet .grabber").boundingBox())!;
+    await page.mouse.move(grabber.x + 18, grabber.y + 2);
+    await page.mouse.down();
+    await page.mouse.move(grabber.x + 18, grabber.y + 60, { steps: 4 });
+    await page.mouse.move(grabber.x + 18, grabber.y + 160, { steps: 4 });
+    await page.mouse.up();
+    expect(await closes(page)).toBe(4);
+  });
+
+  test("Tab zůstává v listu: ✕, obsah a zpět na ✕", async ({ page }) => {
+    await open(page);
+    const focused = () => page.evaluate(() => {
+      let active: Element | null = document.activeElement;
+      const ids: string[] = [];
+      while (active) {
+        ids.push(active.id || active.className || active.localName);
+        active = active.shadowRoot?.activeElement ?? null;
+      }
+      return ids.join(">");
+    });
+    await page.keyboard.press("Tab");
+    expect(await focused()).toContain("close");
+    await page.keyboard.press("Tab");
+    expect(await focused()).toBe("in-a");
+    await page.keyboard.press("Tab");
+    expect(await focused()).toContain("in-tile");
+    await page.keyboard.press("Tab");
+    expect(await focused()).toContain("close");
+  });
+
+  test("axe bez porušení s otevřeným listem", async ({ page }) => {
+    await open(page);
+    expect(await axeViolations(page, ["page-has-heading-one", "region"])).toEqual([]);
   });
 });
