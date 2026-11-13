@@ -125,6 +125,21 @@ test("topení: Ručně platí má 30 min", async ({ page }) => {
   await expect(page.locator("kit-segmented").nth(1).getByRole("radio")).toHaveText(["Do změny plánu", "30 min", "1 h", "3 h", "Trvale"]);
 });
 
+test("přepnutí systému během odesílání: změna dojde všem místnostem, pro které byla", async ({ page }) => {
+  await open(page, "selected=climate.a,climate.b&delay=60000");
+  await page.locator(".modes kit-tile").filter({ hasText: "Chlazení" }).click();
+  await page.evaluate(() => {
+    const climate = (window as any).climate;
+    void climate.flush();
+    climate.system = "heating";
+  });
+  await expect.poll(() => calls(page)).toEqual([
+    { domain: "climate", service: "set_hvac_mode", data: { entity_id: "climate.a", hvac_mode: "cool" } },
+    { domain: "climate", service: "set_hvac_mode", data: { entity_id: "climate.b", hvac_mode: "cool" } },
+    { domain: "climate", service: "set_preset_mode", data: { entity_id: "climate.b", preset_mode: "none" } },
+  ]);
+});
+
 test("320 px bez vodorovného posouvání a axe bez porušení (oba systémy)", async ({ page }) => {
   for (const query of ["", "system=heating"]) {
     await open(page, query);

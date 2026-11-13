@@ -211,18 +211,18 @@ export class HdkClimate extends LitElement {
   protected willUpdate(changed: PropertyValues): void {
     // Another set of rooms or system from the card: what waited belongs to the old one and goes now.
     if ((changed.has("system") && changed.get("system") !== undefined) || (changed.has("rooms") && changed.get("rooms") !== undefined)) {
-      void this.flush(changed.get("selected") ?? this.selected);
+      void this.flush(changed.get("selected") ?? this.selected, changed.get("system") ?? this.system);
     }
   }
 
   /** Sends what waits at once (the sheet closes). */
-  async flush(selected: EntityId[] = this.selected): Promise<void> {
+  async flush(selected: EntityId[] = this.selected, system: ClimateSystem = this.system): Promise<void> {
     window.clearTimeout(this.timer);
     this.timer = undefined;
     const draft = this.draft;
     if (!Object.keys(draft).length) return;
     this.draft = {};
-    await this.send(draft, selected);
+    await this.send(draft, selected, system);
   }
 
   private change(next: ClimateDraft): void {
@@ -233,7 +233,8 @@ export class HdkClimate extends LitElement {
     this.timer = window.setTimeout(() => void this.flush(), this.delayMs);
   }
 
-  private async send(draft: ClimateDraft, selected: EntityId[]): Promise<void> {
+  /** Sends a draft to the rooms it was made for, with the system it was made in (the popup may have switched since). */
+  private async send(draft: ClimateDraft, selected: EntityId[], system: ClimateSystem): Promise<void> {
     const hass = this.hass;
     if (!hass) return;
     this.busy = true;
@@ -241,11 +242,11 @@ export class HdkClimate extends LitElement {
     try {
       for (const entityId of selected) {
         const entity = hass.states[entityId];
-        if (!entity || modeOf(this.system, entity) === undefined) continue;
-        const calls: ServiceCall[] = this.system === "heating" ? heatingCalls(entityId, entity, draft, timer) : coolingCalls(entityId, entity, draft);
+        if (!entity || modeOf(system, entity) === undefined) continue;
+        const calls: ServiceCall[] = system === "heating" ? heatingCalls(entityId, entity, draft, timer) : coolingCalls(entityId, entity, draft);
         for (const call of calls) await hass.callService(call.domain, call.service, call.data);
         const offAfter = draft.offAfter ?? 0;
-        const after = this.system === "cooling" ? coolingStateAfter(entity, draft) : undefined;
+        const after = system === "cooling" ? coolingStateAfter(entity, draft) : undefined;
         if (offAfter > 0 && after !== undefined && after !== "off") await hass.callWS(delayedOff(entityId, offAfter, after));
       }
       this.dispatchEvent(new CustomEvent("hdk-sent", { bubbles: true, composed: true }));
