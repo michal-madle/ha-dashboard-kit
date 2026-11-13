@@ -16,7 +16,7 @@
     defineClimate("kit");
     const params = new URLSearchParams(location.search);
     const system = params.get("system") ?? "cooling";
-    const ac = { hvac_modes: ["off", "cool", "dry", "fan_only", "heat", "auto"], preset_modes: ["none", "sleep", "wind_free"], min_temp: 16, max_temp: 30 };
+    const ac = { hvac_modes: ["off", "cool", "dry", "fan_only", "heat", "auto"], preset_modes: ["none", "sleep", "wind_free"], fan_modes: ["auto", "low", "medium", "high", "turbo"], swing_modes: ["off", "both", "vertical", "horizontal"], fan_mode: "auto", swing_mode: "off", min_temp: 16, max_temp: 30 };
     const tado = { hvac_modes: ["off", "auto", "heat"], min_temp: 5, max_temp: 25 };
     const e = (state, attributes) => ({ state, attributes });
     const states = system === "cooling"
@@ -29,16 +29,17 @@
       rooms: "Místnosti", temperature: "Cílová teplota", mode: "Režim", modes, unavailable: "Nedostupné",
       now: (parts) => `Teď ${parts}`, heats: "topí", targets: (parts) => `Cíl: ${parts}`, mixedModes: (parts) => `Různé režimy: ${parts}`,
       firstChange: "První změna nastaví všechny vybrané stejně.", manualFor: "Ručně platí",
-      manualForChoices: { next: "Do změny plánu", 60: "1 h", 180: "3 h", forever: "Trvale" }, offAfter: "Vypnout za",
+      manualForChoices: { next: "Do změny plánu", 30: "30 min", 60: "1 h", 180: "3 h", forever: "Trvale" }, offAfter: "Vypnout za",
       offAfterChoices: { 0: "Nevypínat", 60: "1 h", 180: "3 h", 480: "8 h" },
       untilNextPlan: "Do další změny plánu, potom zpět na plán.", untilTime: (time) => `Do ${time}, potom zpět na plán.`, untilChanged: "Platí, dokud ho nezměníš.",
-      runsUntilOff: "Běží, dokud ji nevypneš.", offAt: (time) => `Běží do ${time}, potom se vypne.`, sending: "Odesílá se", failed: "Nepodařilo se",
+      runsUntilOff: "Běží, dokud ji nevypneš.", offAt: (time) => `Běží do ${time}, potom se vypne.`, fan: "Síla větru", swing: "Směr proudění", fanModes: { auto: "Auto", low: "Slabě", medium: "Středně", high: "Silně", turbo: "Turbo" }, swingModes: { off: "Pevně", both: "Všude", vertical: "Nahoru a dolů", horizontal: "Do stran" }, detail: "Detail a historie", sending: "Odesílá se", failed: "Nepodařilo se",
     };
     const climate = document.getElementById("climate");
     Object.assign(climate, { hass, i18n: getI18n({ cs: {}, en: {}, sv: {} }, "cs"), texts, system, delayMs: Number(params.get("delay") ?? 300),
       rooms: Object.keys(states).map((entity) => ({ name: { "climate.a": "Obývák", "climate.b": "Ložnice", "climate.c": "Maxík", "climate.d": "Mikuláš" }[entity], entity })),
       selected: (params.get("selected") ?? "climate.a").split(",") });
     window.climate = climate;
+    document.addEventListener("hdk-more-info", (event) => window.calls.push({ moreInfo: event.detail.entityId }));
     window.ready = true;
   </script>
 </body>

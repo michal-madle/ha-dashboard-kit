@@ -75,7 +75,7 @@ test("režim WindFree jedním klepnutím; Vypnout za 3 h naplánuje vypnutí; za
   expect((sent[2].ws as any).sequence[1]).toEqual({ condition: "state", entity_id: "climate.a", state: "cool" });
 });
 
-test("topení: půl stupně, posunutí teploty z Plánu je Ručně do změny plánu; Boost je 25° na 1 h", async ({ page }) => {
+test("topení: půl stupně, posunutí teploty z Plánu je Ručně do změny plánu; Boost je 25° na 30 min", async ({ page }) => {
   await open(page, "system=heating&delay=60000");
   await expect(big(page)).toHaveText("21°");
   await page.locator("kit-slider input").fill("22.5");
@@ -87,7 +87,7 @@ test("topení: půl stupně, posunutí teploty z Plánu je Ručně do změny pl�
   expect(await calls(page)).toEqual([{ domain: "tado_ce", service: "set_climate_timer", data: { entity_id: "climate.a", temperature: 22.5, overlay: "next_time_block" } }]);
   await page.locator("kit-segmented").first().getByRole("radio", { name: "Boost" }).click();
   await page.evaluate(() => (window as any).climate.flush());
-  expect((await calls(page))[1].data).toEqual({ entity_id: "climate.a", temperature: 25, time_period: "01:00:00" });
+  expect((await calls(page))[1].data).toEqual({ entity_id: "climate.a", temperature: 25, time_period: "00:30:00" });
 });
 
 test("bez akce Tado CE není „Ručně platí“ ani Boost; neaktivní segment má ztlumený jezdec; dvě běžící klimatizace v různých režimech mají Vypnout za", async ({ page }) => {
@@ -99,6 +99,30 @@ test("bez akce Tado CE není „Ručně platí“ ani Boost; neaktivní segment 
   expect(await thumb.evaluate((el) => getComputedStyle(el).opacity)).toBe("0.5");
   await open(page, "selected=climate.a,climate.b");
   await expect(page.locator("kit-segmented").getByRole("radio", { name: "3 h" })).toBeEnabled();
+});
+
+test("klimatizace: síla větru a směr proudění z atributů entity; odkaz na detail jen u jedné místnosti", async ({ page }) => {
+  await open(page, "delay=60000");
+  await expect(page.locator("kit-climate h3")).toHaveText(["Režim", "Síla větru", "Směr proudění", "Vypnout za"]);
+  const fan = page.locator("kit-segmented").nth(0);
+  await expect(fan.getByRole("radio")).toHaveText(["Auto", "Slabě", "Středně", "Silně", "Turbo"]);
+  await expect(fan.locator('[aria-checked="true"]')).toHaveText("Auto");
+  await fan.getByRole("radio", { name: "Silně" }).click();
+  await page.locator("kit-segmented").nth(1).getByRole("radio", { name: "Všude" }).click();
+  await page.evaluate(() => (window as any).climate.flush());
+  expect(await calls(page)).toEqual([
+    { domain: "climate", service: "set_fan_mode", data: { entity_id: "climate.a", fan_mode: "high" } },
+    { domain: "climate", service: "set_swing_mode", data: { entity_id: "climate.a", swing_mode: "both" } },
+  ]);
+  await page.getByRole("button", { name: "Detail a historie" }).click();
+  expect((await calls(page)).at(-1)).toEqual({ moreInfo: "climate.a" });
+  await room(page, "Ložnice").click();
+  await expect(page.getByRole("button", { name: "Detail a historie" })).toHaveCount(0);
+});
+
+test("topení: Ručně platí má 30 min", async ({ page }) => {
+  await open(page, "system=heating&selected=climate.b");
+  await expect(page.locator("kit-segmented").nth(1).getByRole("radio")).toHaveText(["Do změny plánu", "30 min", "1 h", "3 h", "Trvale"]);
 });
 
 test("320 px bez vodorovného posouvání a axe bez porušení (oba systémy)", async ({ page }) => {

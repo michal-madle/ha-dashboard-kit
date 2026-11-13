@@ -11,8 +11,8 @@ export type HeatingMode = "plan" | "manual" | "boost" | "off";
 /** Air conditioning: the eight tiles of the mode. */
 export type CoolingMode = "off" | "cool" | "wind_free" | "heat" | "fan_only" | "dry" | "auto" | "sleep";
 export type ClimateMode = HeatingMode | CoolingMode;
-/** Heating "Ručně platí": until the next change of the schedule, 1 h, 3 h, until changed. */
-export type ManualFor = "next" | "60" | "180" | "forever";
+/** Heating "Ručně platí": until the next change of the schedule, 30 min, 1 h, 3 h, until changed (uživatel 13. 11. 2026 k Q202: „můžeme přidat 30 min?“). */
+export type ManualFor = "next" | "30" | "60" | "180" | "forever";
 /** Air conditioning "Vypnout za" in minutes; 0 = do not switch off. */
 export type OffAfter = 0 | 60 | 180 | 480;
 
@@ -27,6 +27,9 @@ export interface ClimateDraft {
   temperature?: number;
   manualFor?: ManualFor;
   offAfter?: OffAfter;
+  /** Air conditioning: the `fan_mode` and `swing_mode` of the entity (Síla větru, Směr proudění). */
+  fan?: string;
+  swing?: string;
 }
 
 export interface ServiceCall {
@@ -123,6 +126,19 @@ export function offeredCooling(entity: HassEntity | undefined): CoolingMode[] {
   });
 }
 
+/** The choices of an attribute list (`fan_modes`, `swing_modes`) that every selected entity offers, in the order of the first. */
+export function sharedChoices(hass: HomeAssistant | undefined, selected: EntityId[], attribute: string): string[] {
+  const lists = selected.map((id) => list(hass?.states[id]?.attributes[attribute])).filter((items) => items.length);
+  if (!lists.length) return [];
+  return lists[0].filter((item) => lists.every((items) => items.includes(item)));
+}
+
+/** The common value of an attribute (`fan_mode`, `swing_mode`) of the selected entities; undefined when they differ. */
+export function commonAttribute(hass: HomeAssistant | undefined, selected: EntityId[], attribute: string): string | undefined {
+  const values = new Set(selected.map((id) => hass?.states[id]?.attributes[attribute]).filter((value): value is string => typeof value === "string"));
+  return values.size === 1 ? [...values][0] : undefined;
+}
+
 /** Tado CE has its timer action (Boost and the duration of Ručně need it). */
 export function heatingTimer(hass: HomeAssistant | undefined): boolean {
   return Boolean(hass?.services?.tado_ce?.set_climate_timer);
@@ -148,7 +164,7 @@ export function heatingCalls(entityId: EntityId, entity: HassEntity | undefined,
   if (!timer) {
     return mode === "manual" ? [{ domain: "climate", service: "set_temperature", data: { entity_id: entityId, temperature: target, hvac_mode: "heat" } }] : [];
   }
-  const manualFor = draft.manualFor ?? (mode === "boost" ? "60" : "next");
+  const manualFor = draft.manualFor ?? (mode === "boost" ? "30" : "next");
   const data: Record<string, unknown> = { entity_id: entityId, temperature: target };
   if (manualFor === "next") data.overlay = "next_time_block";
   else if (manualFor === "forever") data.overlay = "manual";
@@ -182,6 +198,9 @@ export function coolingCalls(entityId: EntityId, entity: HassEntity | undefined,
   if (draft.temperature !== undefined && mode !== "off") {
     calls.push({ domain: "climate", service: "set_temperature", data: { ...target, temperature: Math.round(draft.temperature) } });
   }
+  // Only what the entity offers (`fan_modes`, `swing_modes`).
+  if (draft.fan !== undefined && list(entity?.attributes.fan_modes).includes(draft.fan)) calls.push({ domain: "climate", service: "set_fan_mode", data: { ...target, fan_mode: draft.fan } });
+  if (draft.swing !== undefined && list(entity?.attributes.swing_modes).includes(draft.swing)) calls.push({ domain: "climate", service: "set_swing_mode", data: { ...target, swing_mode: draft.swing } });
   return calls;
 }
 

@@ -9,7 +9,9 @@ import { fitJoined, joinedStyles, joinedText } from "../joined";
 import {
   COOLING_MODES,
   HEATING_MODES,
+  commonAttribute,
   commonMode,
+  sharedChoices,
   coolingCalls,
   coolingStateAfter,
   delayedOff,
@@ -51,12 +53,19 @@ export interface ClimateTexts {
   untilChanged: string;
   runsUntilOff: string;
   offAt: (time: string) => string;
+  /** Síla větru and Směr proudění of the air conditioning, their known values (others show as the entity names them). */
+  fan: string;
+  swing: string;
+  fanModes: Record<string, string>;
+  swingModes: Record<string, string>;
+  /** The link to the detail of the entity of one selected room (its history). */
+  detail: string;
   /** Spoken while the change waits or is being sent. */
   sending: string;
   failed: string;
 }
 
-const MANUAL_FOR: ManualFor[] = ["next", "60", "180", "forever"];
+const MANUAL_FOR: ManualFor[] = ["next", "30", "60", "180", "forever"];
 const OFF_AFTER: OffAfter[] = [0, 60, 180, 480];
 
 /**
@@ -166,6 +175,24 @@ export class HdkClimate extends LitElement {
     .footer {
       margin: 8px 4px 0;
       min-height: 20px;
+    }
+    .detail {
+      display: block;
+      min-height: 44px;
+      margin: 12px 0 0;
+      padding: 0 4px;
+      border: 0;
+      background: none;
+      color: var(--hdk-accent, #0a84ff);
+      font: inherit;
+      font-size: 17px;
+      line-height: 22px;
+      cursor: pointer;
+    }
+    .detail:focus-visible {
+      outline: 2px solid var(--hdk-accent, #0a84ff);
+      outline-offset: -2px;
+      border-radius: 8px;
     }
     .error {
       margin: 8px 4px 0;
@@ -357,8 +384,17 @@ export class HdkClimate extends LitElement {
           </div>`}
       ${mixedModes ? html`<div class="note">${joinedText(t.mixedModes(this.selected.map((id) => `${this.name(id)}\u00a0${t.modes[modeOf(this.system, hass?.states[id]) ?? "off"] ?? ""}`).join(" · ")))}</div>` : nothing}
       ${(different || mixedModes) && !Object.keys(this.draft).length ? html`<div class="note">${t.firstChange}</div>` : nothing}
-      ${this.system === "heating" ? this.renderManualFor(mode) : this.renderOffAfter(mode)}
+      ${this.system === "heating" ? this.renderManualFor(mode) : [this.renderAttribute("fan"), this.renderAttribute("swing"), this.renderOffAfter(mode)]}
       ${this.error ? html`<div class="error" role="alert">${this.error}</div>` : nothing}
+      ${this.selected.length === 1
+        ? html`<button
+            class="detail"
+            type="button"
+            @click=${() => this.dispatchEvent(new CustomEvent("hdk-more-info", { detail: { entityId: this.selected[0] }, bubbles: true, composed: true }))}
+          >
+            ${t.detail}<span aria-hidden="true"> ›</span>
+          </button>`
+        : nothing}
     `;
   }
 
@@ -367,7 +403,7 @@ export class HdkClimate extends LitElement {
     // Without the timer of Tado CE the duration cannot be sent: no section, as Boost is not offered either.
     if (!heatingTimer(this.hass)) return nothing;
     const usable = mode === "manual" || mode === "boost";
-    const value = this.draft.manualFor ?? (mode === "boost" ? "60" : "next");
+    const value = this.draft.manualFor ?? (mode === "boost" ? "30" : "next");
     const minutes = Number(value);
     const footer = !usable ? "" : value === "next" ? t.untilNextPlan : value === "forever" ? t.untilChanged : t.untilTime(this.i18n!.time(Date.now() + minutes * 60000));
     return html`<h3>${t.manualFor}</h3>
@@ -380,6 +416,24 @@ export class HdkClimate extends LitElement {
         onSelect: (next: string) => this.change({ manualFor: next as ManualFor, ...(this.draft.mode === undefined && mode ? { mode } : {}) }),
       })}
       <div class="footer">${footer}</div>`;
+  }
+
+  /** Síla větru or Směr proudění: the choices every selected air conditioner offers; none, no section. */
+  private renderAttribute(kind: "fan" | "swing"): TemplateResult | typeof nothing {
+    const t = this.texts!;
+    const choices = sharedChoices(this.hass, this.selected, kind === "fan" ? "fan_modes" : "swing_modes");
+    if (!choices.length) return nothing;
+    const names = kind === "fan" ? t.fanModes : t.swingModes;
+    const value = this.draft[kind] ?? commonAttribute(this.hass, this.selected, kind === "fan" ? "fan_mode" : "swing_mode") ?? "";
+    const title = kind === "fan" ? t.fan : t.swing;
+    return html`<h3>${title}</h3>
+      ${segmented(this.prefix, {
+        label: title,
+        options: choices.map((item): SegmentOption => ({ value: item, label: names[item] ?? item })),
+        value,
+        wrap: true,
+        onSelect: (next: string) => this.change(kind === "fan" ? { fan: next } : { swing: next }),
+      })}`;
   }
 
   private renderOffAfter(mode: ClimateMode | undefined): TemplateResult {

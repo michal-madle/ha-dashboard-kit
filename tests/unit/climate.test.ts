@@ -73,8 +73,9 @@ describe("volání topení (Tado CE)", () => {
     expect(heatingCalls("climate.t", plan, { mode: "manual", manualFor: "forever" }, true)[0].data).toEqual({ entity_id: "climate.t", temperature: 20, overlay: "manual" });
   });
 
-  it("Boost je 25 °C, výchozí na 1 h; bez akce Tado CE se Boost nepošle a Ručně je set_temperature", () => {
-    expect(heatingCalls("climate.t", plan, { mode: "boost" }, true)[0].data).toEqual({ entity_id: "climate.t", temperature: 25, time_period: "01:00:00" });
+  it("Boost je 25 °C, výchozí na 30 min; bez akce Tado CE se Boost nepošle a Ručně je set_temperature", () => {
+    expect(heatingCalls("climate.t", plan, { mode: "boost" }, true)[0].data).toEqual({ entity_id: "climate.t", temperature: 25, time_period: "00:30:00" });
+    expect(heatingCalls("climate.t", plan, { mode: "manual", manualFor: "30" }, true)[0].data).toEqual({ entity_id: "climate.t", temperature: 20, time_period: "00:30:00" });
     expect(heatingCalls("climate.t", plan, { mode: "boost" }, false)).toEqual([]);
     expect(heatingCalls("climate.t", plan, { temperature: 22 }, false)).toEqual([{ domain: "climate", service: "set_temperature", data: { entity_id: "climate.t", temperature: 22, hvac_mode: "heat" } }]);
   });
@@ -97,6 +98,15 @@ describe("volání klimatizace", () => {
     expect(coolingCalls("climate.k", e("cool", ac), { temperature: 22.4 })).toEqual([{ domain: "climate", service: "set_temperature", data: { entity_id: "climate.k", temperature: 22 } }]);
     expect(coolingCalls("climate.k", e("cool", ac), { mode: "off", temperature: 22 }).map((call) => call.service)).toEqual(["set_hvac_mode"]);
     expect(coolingStateAfter(e("off", ac), { mode: "wind_free" })).toBe("cool");
+  });
+
+  it("síla větru a směr proudění jen z toho, co entita nabízí", () => {
+    const entity = e("cool", { ...ac, fan_modes: ["auto", "low", "high"], swing_modes: ["off", "both"] });
+    expect(coolingCalls("climate.k", entity, { fan: "low", swing: "both" }).map((call) => [call.service, call.data])).toEqual([
+      ["set_fan_mode", { entity_id: "climate.k", fan_mode: "low" }],
+      ["set_swing_mode", { entity_id: "climate.k", swing_mode: "both" }],
+    ]);
+    expect(coolingCalls("climate.k", entity, { fan: "turbo" })).toEqual([]);
   });
 
   it("Vypnout za: skript Home Assistantu s čekáním a podmínkou stavu", () => {
