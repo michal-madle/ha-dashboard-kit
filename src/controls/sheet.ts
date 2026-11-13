@@ -1,6 +1,7 @@
 import { LitElement, css, html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { PropertyValues, TemplateResult } from "lit";
+import { typographyStyles } from "../typography";
 
 /** Pull-down distance (px) or speed (px/ms) that closes the sheet, and the slop before a move is a drag (iOS sheet). */
 const CLOSE_DISTANCE = 100;
@@ -30,7 +31,8 @@ export class HdkSheet extends LitElement {
   private touchOnSlider = false;
   private returnFocus?: HTMLElement | null;
 
-  static styles = css`
+  // The popup has the one typeface of the cards whichever card shows it (DASHBOARD_UX_SYSTEM.md, Písmo).
+  static styles = [typographyStyles, css`
     :host {
       display: contents;
     }
@@ -154,7 +156,7 @@ export class HdkSheet extends LitElement {
         display: none;
       }
     }
-  `;
+  `];
 
   protected willUpdate(changed: PropertyValues): void {
     if (changed.has("open") && this.open && !changed.get("open")) {

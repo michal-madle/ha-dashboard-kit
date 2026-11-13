@@ -6,6 +6,7 @@ import type { I18n } from "../i18n";
 import type { EntityId, HomeAssistant } from "../types";
 import type { SegmentOption } from "../controls/segmented";
 import { fitJoined, joinedStyles, joinedText } from "../joined";
+import { typographyStyles } from "../typography";
 import {
   COOLING_MODES,
   HEATING_MODES,
@@ -97,7 +98,7 @@ export class HdkClimate extends LitElement {
     fitJoined(this.renderRoot, String(Math.round(this.getBoundingClientRect().width)));
   }
 
-  static styles = [joinedStyles, css`
+  static styles = [typographyStyles, joinedStyles, css`
     :host {
       display: block;
     }
