@@ -141,6 +141,8 @@ test("přepnutí systému během odesílání: změna dojde všem místnostem, p
 });
 
 test("320 px bez vodorovného posouvání a axe bez porušení (oba systémy)", async ({ page }) => {
+  // Axe measures the finished sheet, not its fade-in.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   for (const query of ["", "system=heating"]) {
     await open(page, query);
     await page.setViewportSize({ width: 320, height: 852 });

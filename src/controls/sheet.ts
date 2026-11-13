@@ -23,6 +23,8 @@ export class HdkSheet extends LitElement {
   @property() sub = "";
   /** Spoken name of ✕, in the language of the card. */
   @property() closeLabel = "Close";
+  /** A phone on its side (or any short window): the sheet takes the whole width (a chart in it gets the full width). */
+  @property({ type: Boolean }) wide = false;
   @state() private dragY = 0;
   @state() private dragging = false;
 
@@ -47,7 +49,7 @@ export class HdkSheet extends LitElement {
       overscroll-behavior: contain;
       touch-action: none;
     }
-    .sheet {
+    .panel {
       box-sizing: border-box;
       width: 100%;
       max-width: 460px;
@@ -63,10 +65,10 @@ export class HdkSheet extends LitElement {
       animation: rise 220ms ease-out;
       transition: transform 220ms ease-out;
     }
-    .sheet:focus {
+    .panel:focus {
       outline: none;
     }
-    .sheet.dragging {
+    .panel.dragging {
       transition: none;
     }
     .top {
@@ -139,7 +141,7 @@ export class HdkSheet extends LitElement {
       }
     }
     @media (prefers-reduced-motion: reduce) {
-      .sheet {
+      .panel {
         animation: none;
         transition: none;
       }
@@ -148,12 +150,18 @@ export class HdkSheet extends LitElement {
       .backdrop {
         align-items: center;
       }
-      .sheet {
+      .panel {
         border-bottom: 1px solid var(--hdk-sheet-border, rgb(255 255 255 / 10%));
         border-radius: 24px;
       }
       .grabber {
         display: none;
+      }
+    }
+    @media (orientation: landscape) and (max-height: 600px) {
+      .panel.wide {
+        max-width: min(960px, calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+        max-height: calc(100% - 16px);
       }
     }
   `];
@@ -171,7 +179,7 @@ export class HdkSheet extends LitElement {
   protected updated(changed: PropertyValues): void {
     if (!changed.has("open")) return;
     if (this.open) {
-      this.renderRoot.querySelector<HTMLElement>(".sheet")?.focus();
+      this.renderRoot.querySelector<HTMLElement>(".panel")?.focus();
     } else if (changed.get("open")) {
       this.returnFocus?.focus?.();
       this.returnFocus = undefined;
@@ -182,14 +190,16 @@ export class HdkSheet extends LitElement {
     this.dispatchEvent(new CustomEvent("hdk-close", { bubbles: true, composed: true }));
   }
 
-  /** The focusable elements of the sheet: its ✕ and the slotted content. */
+  /** The focusable elements of the sheet: its ✕ and the slotted content, inside shadow roots too (the controls of the kit). */
   private focusable(): HTMLElement[] {
+    const selector = 'button:not([disabled]):not([tabindex="-1"]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const deep = (root: ParentNode): HTMLElement[] =>
+      [...root.querySelectorAll<HTMLElement>("*")].flatMap((element) => [
+        ...(element.matches(selector) ? [element] : []),
+        ...(element.shadowRoot ? deep(element.shadowRoot) : []),
+      ]);
     const close = this.renderRoot.querySelector<HTMLElement>(".close");
-    const inside = [...this.querySelectorAll<HTMLElement>("*")].flatMap((element) => {
-      const target = element.shadowRoot?.querySelector<HTMLElement>("button:not([disabled]), input:not([disabled])") ?? element;
-      return target.matches("button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex='-1'])") ? [target] : [];
-    });
-    return [...(close ? [close] : []), ...inside];
+    return [...(close ? [close] : []), ...deep(this).filter((element) => element.getClientRects().length > 0)];
   }
 
   private keydown = (event: KeyboardEvent): void => {
@@ -211,7 +221,9 @@ export class HdkSheet extends LitElement {
   private touchStart = (event: TouchEvent): void => {
     this.touchY = event.touches[0]?.clientY;
     // A finger on a slider drags the slider: cancelling its moves would freeze it (iOS).
-    this.touchOnSlider = event.composedPath().some((node) => node instanceof HTMLElement && (node.localName.endsWith("-slider") || (node instanceof HTMLInputElement && node.type === "range")));
+    this.touchOnSlider = event
+      .composedPath()
+      .some((node) => node instanceof HTMLElement && (node.localName.endsWith("-slider") || "drag" in node.dataset || (node instanceof HTMLInputElement && node.type === "range")));
   };
 
   private touchMove = (event: TouchEvent): void => {
@@ -224,7 +236,7 @@ export class HdkSheet extends LitElement {
 
   /** `movement` > 0 pulls the content down (towards its top), < 0 up. Outside the sheet nothing scrolls. */
   private cannotScroll(event: Event, movement: number): boolean {
-    const sheet = this.renderRoot.querySelector<HTMLElement>(".sheet");
+    const sheet = this.renderRoot.querySelector<HTMLElement>(".panel");
     if (!sheet || !event.composedPath().includes(sheet)) return true;
     const scrolls = sheet.scrollHeight > sheet.clientHeight + 1;
     return !scrolls || (movement > 0 && sheet.scrollTop <= 0) || (movement < 0 && sheet.scrollTop + sheet.clientHeight >= sheet.scrollHeight - 1);
@@ -272,7 +284,7 @@ export class HdkSheet extends LitElement {
       @wheel=${this.wheel}
     >
       <div
-        class="sheet ${this.dragging ? "dragging" : ""}"
+        class="panel ${this.wide ? "wide" : ""} ${this.dragging ? "dragging" : ""}"
         part="sheet"
         style=${this.dragY > 0 ? `transform: translateY(${this.dragY}px)` : ""}
         role="dialog"
