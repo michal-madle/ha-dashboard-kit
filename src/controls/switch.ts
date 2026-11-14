@@ -1,4 +1,4 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { property } from "lit/decorators.js";
 import type { TemplateResult } from "lit";
 import { HoldOrDoubleTap } from "../gesture";
@@ -17,6 +17,8 @@ import { HintState, hintStyles } from "./hint";
 export class HdkSwitch extends LitElement {
   @property({ type: Boolean }) checked = false;
   @property({ type: Boolean }) disabled = false;
+  /** The change is on its way (spec kitu, Odezva): the track pulses until Home Assistant reports it. */
+  @property({ type: Boolean, reflect: true }) pending = false;
   @property() label = "";
   @property({ type: Boolean }) guarded = false;
   @property({ type: Number }) holdMs = 550;
@@ -55,6 +57,21 @@ export class HdkSwitch extends LitElement {
       }
       button[aria-checked="true"] {
         background: var(--hdk-accent, #0a84ff);
+      }
+      :host([pending]) button {
+        animation: hdk-switch-pending 1.3s ease-in-out infinite alternate;
+      }
+      @keyframes hdk-switch-pending {
+        to {
+          opacity: 0.5;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        :host([pending]) button {
+          animation: none;
+          outline: 1.5px dashed var(--hdk-accent, #0a84ff);
+          outline-offset: 2px;
+        }
       }
       /* Invisible extension of the touch target to 44 px. */
       button::after {
@@ -127,6 +144,7 @@ export class HdkSwitch extends LitElement {
         role="switch"
         class=${this.hints.nudge ? "nudge" : ""}
         aria-checked=${this.checked ? "true" : "false"}
+        aria-busy=${this.pending ? "true" : nothing}
         aria-label=${this.label}
         ?disabled=${this.disabled}
         @click=${this.onClick}

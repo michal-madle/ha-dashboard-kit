@@ -1,4 +1,4 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { TemplateResult } from "lit";
 import { HoldOrDoubleTap } from "../gesture";
@@ -27,6 +27,8 @@ export class HdkSegmented extends LitElement {
   @property() value = "";
   @property() label = "";
   @property({ type: Boolean }) disabled = false;
+  /** The chosen option is on its way (spec kitu, Odezva): the thumb pulses until Home Assistant reports it. */
+  @property({ type: Boolean, reflect: true }) pending = false;
   @property({ type: Boolean }) compact = false;
   /** Labels may take two lines (a 66 px capsule with a narrower padding), e.g. „Do změny plánu“ beside „1 h“. */
   @property({ type: Boolean }) wrap = false;
@@ -101,6 +103,21 @@ export class HdkSegmented extends LitElement {
       }
       .track.dragging .thumb {
         transition: none;
+      }
+      :host([pending]) .thumb {
+        animation: hdk-seg-pending 1.3s ease-in-out infinite alternate;
+      }
+      @keyframes hdk-seg-pending {
+        to {
+          opacity: 0.45;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        :host([pending]) .thumb {
+          animation: none;
+          outline: 1.5px dashed var(--hdk-accent, #0a84ff);
+          outline-offset: -1.5px;
+        }
       }
       .thumb[hidden] {
         display: none;
@@ -187,6 +204,7 @@ export class HdkSegmented extends LitElement {
     return html`<div
         class="track ${this.compact ? "compact" : ""} ${this.guarded ? "guarded" : ""} ${this._dragging ? "dragging" : ""} ${this.options.some((option) => option.detail) || this.wrap ? "tall" : ""} ${this.wrap ? "wrap" : ""} ${this.disabled ? "off" : ""}"
         role="radiogroup"
+        aria-busy=${this.pending ? "true" : nothing}
         aria-label=${this.label}
         style="--n:${Math.max(1, this.options.length)};--i:${Math.max(0, index)};--dx:${dx}px"
         @keydown=${this.onKey}
