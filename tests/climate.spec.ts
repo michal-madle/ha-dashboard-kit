@@ -122,7 +122,31 @@ test("klimatizace: síla větru a směr proudění z atributů entity; odkaz na 
 
 test("topení: Ručně platí má 30 min", async ({ page }) => {
   await open(page, "system=heating&selected=climate.b");
-  await expect(page.locator("kit-segmented").nth(1).getByRole("radio")).toHaveText(["Do změny plánu", "30 min", "1 h", "3 h", "Trvale"]);
+  await expect(page.locator("kit-segmented").nth(1).getByRole("radio")).toHaveText(["Do plánu", "30 min", "1 h", "3 h", "Trvale"]);
+  // A short label keeps the control at its usual height (uživatel 14. 11. 2026 k „Do změny plánu“ na třech řádcích: „Q237 … 2 ano“).
+  expect(await page.locator("kit-segmented").nth(1).locator(".track").evaluate((el) => el.getBoundingClientRect().height)).toBeLessThanOrEqual(50);
+});
+
+test("topení: Vypnuto má dobu (uživatel 14. 11. 2026: „vypnout jen na hodinu a nezapomněl“); ruční cíl 5 °C se čte jako Vypnuto", async ({ page }) => {
+  await open(page, "system=heating&delay=60000");
+  await page.locator("kit-segmented").first().getByRole("radio", { name: "Vypnuto" }).click();
+  // Without a choice Vypnuto holds until changed, as before: the mode `off` of the entity.
+  await expect(page.locator("kit-climate h3").nth(1)).toHaveText("Vypnuto platí");
+  await expect(page.locator("kit-segmented").nth(1).locator('[aria-checked="true"]')).toHaveText("Trvale");
+  await expect(page.locator("kit-climate .footer")).toHaveText("Vypnuto, dokud ho nezapneš.");
+  await page.locator("kit-segmented").nth(1).getByRole("radio", { name: "1 h" }).click();
+  await expect(page.locator("kit-climate .footer")).toHaveText(/^Vypnuto do \d{1,2}:\d{2}, potom zpět na plán\.$/);
+  await page.evaluate(() => (window as any).climate.flush());
+  expect(await calls(page)).toEqual([{ domain: "tado_ce", service: "set_climate_timer", data: { entity_id: "climate.a", temperature: 5, time_period: "01:00:00" } }]);
+  // What Tado then reports (Ručně at 5 °C) is Vypnuto in the tile, in the big word and in the mode.
+  await page.evaluate(() => {
+    const climate = (window as any).climate;
+    const states = { ...climate.hass.states, "climate.a": { ...climate.hass.states["climate.a"], state: "heat", attributes: { ...climate.hass.states["climate.a"].attributes, temperature: 5 } } };
+    climate.hass = { ...climate.hass, states };
+  });
+  await expect(room(page, "Obývák")).toContainText("Vypnuto");
+  await expect(big(page)).toHaveText("Vypnuto");
+  await expect(page.locator("kit-segmented").first().locator('[aria-checked="true"]')).toHaveText("Vypnuto");
 });
 
 test("přepnutí systému během odesílání: změna dojde všem místnostem, pro které byla", async ({ page }) => {

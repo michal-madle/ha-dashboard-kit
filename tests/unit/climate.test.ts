@@ -14,6 +14,8 @@ describe("stav místnosti", () => {
     expect(modeOf("heating", e("heat", { temperature: 22.5 }))).toBe("manual");
     expect(modeOf("heating", e("heat", { temperature: 25 }))).toBe("boost");
     expect(modeOf("heating", e("off"))).toBe("off");
+    // Vypnuto for a limited time is a manual target at the frost protection (5 °C).
+    expect(modeOf("heating", e("heat", { temperature: 5 }))).toBe("off");
     expect(modeOf("heating", e("unavailable"))).toBeUndefined();
   });
 
@@ -63,6 +65,16 @@ describe("volání topení (Tado CE)", () => {
   it("Plán a Vypnuto jsou režim entity", () => {
     expect(heatingCalls("climate.t", plan, { mode: "plan" }, true)).toEqual([{ domain: "climate", service: "set_hvac_mode", data: { entity_id: "climate.t", hvac_mode: "auto" } }]);
     expect(heatingCalls("climate.t", plan, { mode: "off" }, true)[0].data.hvac_mode).toBe("off");
+  });
+
+  it("Vypnuto s dobou je časovač na 5 °C (1 h, do změny plánu); Trvale a bez Tado CE režim off; Ručně po vypnutí začíná na 21 °C", () => {
+    expect(heatingCalls("climate.t", plan, { mode: "off", manualFor: "60" }, true)).toEqual([
+      { domain: "tado_ce", service: "set_climate_timer", data: { entity_id: "climate.t", temperature: 5, time_period: "01:00:00" } },
+    ]);
+    expect(heatingCalls("climate.t", plan, { mode: "off", manualFor: "next" }, true)[0].data).toEqual({ entity_id: "climate.t", temperature: 5, overlay: "next_time_block" });
+    expect(heatingCalls("climate.t", plan, { mode: "off", manualFor: "forever" }, true)[0].data.hvac_mode).toBe("off");
+    expect(heatingCalls("climate.t", plan, { mode: "off", manualFor: "60" }, false)[0].data.hvac_mode).toBe("off");
+    expect(heatingCalls("climate.t", e("heat", { temperature: 5 }), { mode: "manual" }, true)[0].data.temperature).toBe(21);
   });
 
   it("jen nová teplota je Ručně do změny plánu; doba 1 h je time_period, Trvale overlay manual", () => {

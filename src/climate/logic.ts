@@ -11,7 +11,7 @@ export type HeatingMode = "plan" | "manual" | "boost" | "off";
 /** Air conditioning: the eight tiles of the mode. */
 export type CoolingMode = "off" | "cool" | "wind_free" | "heat" | "fan_only" | "dry" | "auto" | "sleep";
 export type ClimateMode = HeatingMode | CoolingMode;
-/** Heating "Ručně platí": until the next change of the schedule, 30 min, 1 h, 3 h, until changed (uživatel 13. 11. 2026 k Q202: „můžeme přidat 30 min?“). */
+/** Heating "Ručně platí" and "Vypnuto platí": until the next change of the schedule, 30 min, 1 h, 3 h, until changed (uživatel 13. 11. 2026 k Q202: „můžeme přidat 30 min?“). */
 export type ManualFor = "next" | "30" | "60" | "180" | "forever";
 /** Air conditioning "Vypnout za" in minutes; 0 = do not switch off. */
 export type OffAfter = 0 | 60 | 180 | 480;
@@ -40,6 +40,13 @@ export interface ServiceCall {
 
 /** Tado: a manual target of 25 °C is Boost, Boost is sent as 25 °C. */
 export const BOOST_TEMPERATURE = 25;
+/**
+ * Vypnuto for a limited time (uživatel 14. 11. 2026: „pridat i do Vypnuto čas, abych to mohl vypnout jen na hodinu a
+ * nezapomněl“) is a manual target at the frost protection of Tado: a manual target at or under it reads as Vypnuto.
+ */
+export const OFF_TEMPERATURE = 5;
+/** The target Ručně starts from when the room has none of its own (it was off). */
+export const DEFAULT_MANUAL_TEMPERATURE = 21;
 export const COOLING_MODES: CoolingMode[] = ["off", "cool", "wind_free", "heat", "fan_only", "dry", "auto", "sleep"];
 export const HEATING_MODES: HeatingMode[] = ["plan", "manual", "boost", "off"];
 
@@ -63,7 +70,11 @@ export function modeOf(system: ClimateSystem, entity: HassEntity | undefined): C
   if (system === "heating") {
     if (state === "auto") return "plan";
     if (state === "off") return "off";
-    if (state === "heat") return numberOf(entity.attributes.temperature) === BOOST_TEMPERATURE ? "boost" : "manual";
+    if (state === "heat") {
+      const target = numberOf(entity.attributes.temperature);
+      if (target !== undefined && target <= OFF_TEMPERATURE) return "off";
+      return target === BOOST_TEMPERATURE ? "boost" : "manual";
+    }
     return undefined;
   }
   const preset = String(entity.attributes.preset_mode ?? "");
@@ -152,15 +163,26 @@ export function timePeriod(minutes: number): string {
 /**
  * The calls for one heating room. A draft with only a new temperature is Ručně (spec: „Posunutí teploty přepne Plán
  * na Ručně“). Ručně and Boost use `tado_ce.set_climate_timer` (target and `overlay` next_time_block / manual
- * or `time_period`); without that action Ručně is `climate.set_temperature` and Boost is not sent.
+ * or `time_period`); without that action Ručně is `climate.set_temperature` and Boost is not sent. Vypnuto with a duration
+ * (`manualFor` other than "forever") is the same timer at `OFF_TEMPERATURE`, so Tado returns to the schedule by itself;
+ * Vypnuto without one, or without the timer action, is the mode `off` of the entity.
  */
 export function heatingCalls(entityId: EntityId, entity: HassEntity | undefined, draft: ClimateDraft, timer: boolean): ServiceCall[] {
   // The popup sets Ručně itself when the temperature moves; a draft with only a temperature is Ručně too.
   const mode = (draft.mode as HeatingMode | undefined) ?? (draft.temperature !== undefined ? "manual" : modeOf("heating", entity));
   if (mode === undefined) return [];
   if (mode === "plan") return [{ domain: "climate", service: "set_hvac_mode", data: { entity_id: entityId, hvac_mode: "auto" } }];
-  if (mode === "off") return [{ domain: "climate", service: "set_hvac_mode", data: { entity_id: entityId, hvac_mode: "off" } }];
-  const target = mode === "boost" ? BOOST_TEMPERATURE : (draft.temperature ?? numberOf(entity?.attributes.temperature) ?? 21);
+  if (mode === "off") {
+    const offFor = draft.manualFor ?? "forever";
+    if (!timer || offFor === "forever") return [{ domain: "climate", service: "set_hvac_mode", data: { entity_id: entityId, hvac_mode: "off" } }];
+    const off: Record<string, unknown> = { entity_id: entityId, temperature: OFF_TEMPERATURE };
+    if (offFor === "next") off.overlay = "next_time_block";
+    else off.time_period = timePeriod(Number(offFor));
+    return [{ domain: "tado_ce", service: "set_climate_timer", data: off }];
+  }
+  const current = numberOf(entity?.attributes.temperature);
+  // A room that was off has the frost protection as its target: Ručně starts from the default instead.
+  const target = mode === "boost" ? BOOST_TEMPERATURE : (draft.temperature ?? (current !== undefined && current > OFF_TEMPERATURE ? current : DEFAULT_MANUAL_TEMPERATURE));
   if (!timer) {
     return mode === "manual" ? [{ domain: "climate", service: "set_temperature", data: { entity_id: entityId, temperature: target, hvac_mode: "heat" } }] : [];
   }

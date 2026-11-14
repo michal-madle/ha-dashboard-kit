@@ -30,7 +30,7 @@ export class HdkSegmented extends LitElement {
   /** The chosen option is on its way (spec kitu, Odezva): the thumb pulses until Home Assistant reports it. */
   @property({ type: Boolean, reflect: true }) pending = false;
   @property({ type: Boolean }) compact = false;
-  /** Labels may take two lines (a 66 px capsule with a narrower padding), e.g. „Do změny plánu“ beside „1 h“. */
+  /** Long labels: a smaller text with a narrower padding that may take two lines inside the usual height, e.g. „Until schedule“ beside „1 h“. */
   @property({ type: Boolean }) wrap = false;
   @property({ type: Boolean }) guarded = false;
   @property({ type: Number }) holdMs = 550;
@@ -80,8 +80,14 @@ export class HdkSegmented extends LitElement {
       .track.wrap button {
         padding: 0 4px;
         font-size: 13px;
-        line-height: 17px;
+        line-height: 16px;
         text-align: center;
+      }
+      /* Five and more options: a smaller text and a narrower padding, so neighbouring labels do not touch („Střední“, „Vysoká“). */
+      .track.many button {
+        padding: 0 4px;
+        font-size: 15px;
+        line-height: 20px;
       }
       /* A control that cannot be used now does not look chosen: the thumb fades with the labels. */
       .track.off .thumb {
@@ -202,7 +208,7 @@ export class HdkSegmented extends LitElement {
     const nudge = this.hints.nudge && !calm ? Math.sign(this.nudgeIndex - index) * 14 : 0;
     const dx = this._dragging ? this._dx : nudge;
     return html`<div
-        class="track ${this.compact ? "compact" : ""} ${this.guarded ? "guarded" : ""} ${this._dragging ? "dragging" : ""} ${this.options.some((option) => option.detail) || this.wrap ? "tall" : ""} ${this.wrap ? "wrap" : ""} ${this.disabled ? "off" : ""}"
+        class="track ${this.compact ? "compact" : ""} ${this.guarded ? "guarded" : ""} ${this._dragging ? "dragging" : ""} ${this.options.some((option) => option.detail) ? "tall" : ""} ${this.wrap ? "wrap" : !this.compact && this.options.length >= 5 ? "many" : ""} ${this.disabled ? "off" : ""}"
         role="radiogroup"
         aria-busy=${this.pending ? "true" : nothing}
         aria-label=${this.label}

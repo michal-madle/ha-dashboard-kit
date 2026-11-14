@@ -9,7 +9,9 @@ import { fitJoined, joinedStyles, joinedText } from "../joined";
 import { typographyStyles } from "../typography";
 import {
   COOLING_MODES,
+  DEFAULT_MANUAL_TEMPERATURE,
   HEATING_MODES,
+  OFF_TEMPERATURE,
   commonAttribute,
   commonMode,
   sharedChoices,
@@ -45,6 +47,8 @@ export interface ClimateTexts {
   /** "První změna nastaví všechny vybrané stejně." */
   firstChange: string;
   manualFor: string;
+  /** The heading of the same choices while the mode is Vypnuto ("Vypnuto platí"). */
+  offFor: string;
   manualForChoices: Record<ManualFor, string>;
   offAfter: string;
   offAfterChoices: Record<string, string>;
@@ -52,6 +56,10 @@ export interface ClimateTexts {
   untilNextPlan: string;
   untilTime: (time: string) => string;
   untilChanged: string;
+  /** Footers of Vypnuto with a duration and without one. */
+  offUntilNextPlan: string;
+  offUntilTime: (time: string) => string;
+  offUntilChanged: string;
   runsUntilOff: string;
   offAt: (time: string) => string;
   /** Síla větru and Směr proudění of the air conditioning, their known values (others show as the entity names them). */
@@ -169,7 +177,8 @@ export class HdkClimate extends LitElement {
     }
     .modes {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      /* Four in a row on a phone, three on the narrowest one: a mode never gets a tile too narrow for its name. */
+      grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
       gap: 8px;
     }
     .note,
@@ -302,7 +311,9 @@ export class HdkClimate extends LitElement {
     const now = commonMode(this.system, hass, this.selected);
     const mode = this.draft.mode ?? now;
     const different = this.draft.temperature === undefined && values.length > 1;
-    const value = this.draft.temperature ?? (mode === "boost" ? 25 : values[0]);
+    const known0 = values[0];
+    // A room that was off has the frost protection as its target: Ručně starts from the default instead.
+    const value = this.draft.temperature ?? (mode === "boost" ? 25 : mode === "manual" && known0 !== undefined && known0 <= OFF_TEMPERATURE ? DEFAULT_MANUAL_TEMPERATURE : known0);
     const word = mode === "off" || mode === "fan_only";
     const big = word && mode !== undefined ? t.modes[mode] : different ? `${this.degrees(Math.min(...values)).replace(/°$/, "")}–${this.degrees(Math.max(...values))}` : value !== undefined ? this.degrees(value) : "––";
 
@@ -404,13 +415,22 @@ export class HdkClimate extends LitElement {
     const t = this.texts!;
     // Without the timer of Tado CE the duration cannot be sent: no section, as Boost is not offered either.
     if (!heatingTimer(this.hass)) return nothing;
-    const usable = mode === "manual" || mode === "boost";
-    const value = this.draft.manualFor ?? (mode === "boost" ? "30" : "next");
+    // Vypnuto takes a duration too (uživatel 14. 11. 2026: „vypnout jen na hodinu a nezapomněl“); without a choice it holds until changed, as before.
+    const off = mode === "off";
+    const usable = mode === "manual" || mode === "boost" || off;
+    const value = this.draft.manualFor ?? (mode === "boost" ? "30" : off ? "forever" : "next");
     const minutes = Number(value);
-    const footer = !usable ? "" : value === "next" ? t.untilNextPlan : value === "forever" ? t.untilChanged : t.untilTime(this.i18n!.time(Date.now() + minutes * 60000));
-    return html`<h3>${t.manualFor}</h3>
+    // Only a duration in minutes has an end ("next" and "forever" are not numbers).
+    const until = (): string => this.i18n!.time(Date.now() + minutes * 60000);
+    const footer = !usable
+      ? ""
+      : off
+        ? value === "next" ? t.offUntilNextPlan : value === "forever" ? t.offUntilChanged : t.offUntilTime(until())
+        : value === "next" ? t.untilNextPlan : value === "forever" ? t.untilChanged : t.untilTime(until());
+    const heading = off ? t.offFor : t.manualFor;
+    return html`<h3>${heading}</h3>
       ${segmented(this.prefix, {
-        label: t.manualFor,
+        label: heading,
         options: MANUAL_FOR.map((item): SegmentOption => ({ value: item, label: t.manualForChoices[item] })),
         value,
         disabled: !usable,

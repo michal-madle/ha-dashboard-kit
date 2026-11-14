@@ -58,6 +58,7 @@ export class HdkTile extends LitElement {
         position: relative;
         display: block;
         min-width: 0;
+        container-type: inline-size;
       }
       button {
         position: relative;
@@ -155,7 +156,17 @@ export class HdkTile extends LitElement {
         line-height: 22px;
       }
       :host([centered]) .name > span:first-child {
-        flex: none;
+        flex: 0 1 auto;
+      }
+      /* A narrow centred tile (four modes in a row on a phone): a smaller name and less padding, so „Chlazení“ and „WindFree“ keep clear of the edges. */
+      @container (max-width: 100px) {
+        :host([centered]) button {
+          padding: 10px 6px;
+        }
+        :host([centered]) .name {
+          font-size: 15px;
+          line-height: 20px;
+        }
       }
       .count {
         flex: none;

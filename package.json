@@ -1,6 +1,6 @@
 {
   "name": "ha-dashboard-kit",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Shared building blocks of the Home Assistant Lovelace cards of Michal Madle (Klima, Energie, Dům)",
   "license": "MIT",
   "private": true,
@@ -18,16 +18,36 @@
     "./controls": "./src/controls/index.ts",
     "./climate": "./src/climate/index.ts",
     "./tsconfig.base.json": "./tsconfig.base.json",
-    "./build/vite.mjs": { "types": "./build/vite.d.mts", "default": "./build/vite.mjs" },
+    "./build/vite.mjs": {
+      "types": "./build/vite.d.mts",
+      "default": "./build/vite.mjs"
+    },
     "./build/copy-build.mjs": "./build/copy-build.mjs",
-    "./testing/server.mjs": { "types": "./testing/server.d.mts", "default": "./testing/server.mjs" },
-    "./testing/playwright.mjs": { "types": "./testing/playwright.d.mts", "default": "./testing/playwright.mjs" },
-    "./testing/fixtures.mjs": { "types": "./testing/fixtures.d.mts", "default": "./testing/fixtures.mjs" },
+    "./testing/server.mjs": {
+      "types": "./testing/server.d.mts",
+      "default": "./testing/server.mjs"
+    },
+    "./testing/playwright.mjs": {
+      "types": "./testing/playwright.d.mts",
+      "default": "./testing/playwright.mjs"
+    },
+    "./testing/fixtures.mjs": {
+      "types": "./testing/fixtures.d.mts",
+      "default": "./testing/fixtures.mjs"
+    },
     "./testing/coverage.mjs": "./testing/coverage.mjs",
-    "./testing/helpers.mjs": { "types": "./testing/helpers.d.mts", "default": "./testing/helpers.mjs" },
+    "./testing/helpers.mjs": {
+      "types": "./testing/helpers.d.mts",
+      "default": "./testing/helpers.mjs"
+    },
     "./package.json": "./package.json"
   },
-  "files": ["src", "build", "testing", "tsconfig.base.json"],
+  "files": [
+    "src",
+    "build",
+    "testing",
+    "tsconfig.base.json"
+  ],
   "scripts": {
     "check": "tsc --noEmit",
     "test": "tsc --noEmit && vitest run && playwright test"
@@ -37,7 +57,9 @@
     "lit": "^3.3.1"
   },
   "peerDependenciesMeta": {
-    "@playwright/test": { "optional": true }
+    "@playwright/test": {
+      "optional": true
+    }
   },
   "dependencies": {
     "axe-core": "^4.14.0",

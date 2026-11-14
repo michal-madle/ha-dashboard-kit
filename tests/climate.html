@@ -28,10 +28,10 @@
     const texts = {
       rooms: "Místnosti", temperature: "Cílová teplota", mode: "Režim", modes, unavailable: "Nedostupné",
       now: (parts) => `Teď ${parts}`, heats: "topí", targets: (parts) => `Cíl: ${parts}`, mixedModes: (parts) => `Různé režimy: ${parts}`,
-      firstChange: "První změna nastaví všechny vybrané stejně.", manualFor: "Ručně platí",
-      manualForChoices: { next: "Do změny plánu", 30: "30 min", 60: "1 h", 180: "3 h", forever: "Trvale" }, offAfter: "Vypnout za",
+      firstChange: "První změna nastaví všechny vybrané stejně.", manualFor: "Ručně platí", offFor: "Vypnuto platí",
+      manualForChoices: { next: "Do plánu", 30: "30 min", 60: "1 h", 180: "3 h", forever: "Trvale" }, offAfter: "Vypnout za",
       offAfterChoices: { 0: "Nevypínat", 60: "1 h", 180: "3 h", 480: "8 h" },
-      untilNextPlan: "Do další změny plánu, potom zpět na plán.", untilTime: (time) => `Do ${time}, potom zpět na plán.`, untilChanged: "Platí, dokud ho nezměníš.",
+      untilNextPlan: "Do další změny plánu, potom zpět na plán.", untilTime: (time) => `Do ${time}, potom zpět na plán.`, untilChanged: "Platí, dokud ho nezměníš.", offUntilNextPlan: "Vypnuto do další změny plánu, potom zpět na plán.", offUntilTime: (time) => `Vypnuto do ${time}, potom zpět na plán.`, offUntilChanged: "Vypnuto, dokud ho nezapneš.",
       runsUntilOff: "Běží, dokud ji nevypneš.", offAt: (time) => `Běží do ${time}, potom se vypne.`, fan: "Síla větru", swing: "Směr proudění", fanModes: { auto: "Auto", low: "Slabě", medium: "Středně", high: "Silně", turbo: "Turbo" }, swingModes: { off: "Pevně", both: "Všude", vertical: "Nahoru a dolů", horizontal: "Do stran" }, detail: "Detail a historie", sending: "Odesílá se", failed: "Nepodařilo se",
     };
     const climate = document.getElementById("climate");
