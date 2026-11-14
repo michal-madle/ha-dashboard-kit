@@ -1,7 +1,8 @@
 {
   "name": "ha-dashboard-kit",
   "version": "0.9.0",
-  "description": "Shared building blocks of the Home Assistant Lovelace cards of Michal Madle (Klima, Energie)",
+  "description": "Shared building blocks of the Home Assistant Lovelace cards of Michal Madle (Klima, Energie, Dům)",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "exports": {
