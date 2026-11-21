@@ -113,6 +113,16 @@ test.describe("chráněný segmentový ovladač", () => {
   });
 });
 
+test("posuvník s malovanou dráhou: dráha má obrázek místo výplně akcentem, hodnota zůstává", async ({ page }) => {
+  const input = page.locator("#slider-hue").locator("input[type=range]");
+  await expect(input).toHaveClass("painted");
+  // The pseudo-element of the bar has no computed style in the page; the bar reads the variable.
+  const track = await input.evaluate((el) => getComputedStyle(el).getPropertyValue("--track"));
+  expect(track).toContain("linear-gradient");
+  await expect(page.locator("#slider").locator("input[type=range]")).not.toHaveClass("painted");
+  await expect(input).toHaveValue("120");
+});
+
 test("posuvník: klávesnice změní hodnotu a pošle hdk-change; čtečka má název a hodnotu", async ({ page }) => {
   const input = page.locator("#slider").locator("input[type=range]");
   await expect(input).toHaveAttribute("aria-label", "Temperature");

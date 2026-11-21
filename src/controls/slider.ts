@@ -29,6 +29,11 @@ export class HdkSlider extends LitElement {
    */
   @property({ type: Boolean, reflect: true }) mixed = false;
   @property({ attribute: false }) marks: number[] = [];
+  /**
+   * The bar painted with this CSS image instead of the accent fill (the colour of a light: a rainbow for the hue, warm
+   * to cold for the colour temperature); the thumb shows the value, the bar shows what the values mean.
+   */
+  @property() track = "";
 
   @state() private _drag?: number;
 
@@ -93,6 +98,15 @@ export class HdkSlider extends LitElement {
       border-radius: 12px;
       background: #fff;
       box-shadow: 0 2px 6px rgb(0 0 0 / 40%);
+    }
+    input.painted::-webkit-slider-runnable-track {
+      background: var(--track);
+    }
+    input.painted::-moz-range-track {
+      background: var(--track);
+    }
+    input.painted::-moz-range-progress {
+      background: transparent;
     }
     :host([mixed]) input::-webkit-slider-thumb {
       opacity: 0;
@@ -172,7 +186,8 @@ export class HdkSlider extends LitElement {
           aria-label=${this.label}
           aria-valuetext=${this.valueText || String(shown)}
           ?disabled=${this.disabled}
-          style="--fill: ${fill}"
+          class=${this.track ? "painted" : ""}
+          style="--fill: ${fill}${this.track ? `; --track: ${this.track}` : ""}"
           @input=${this.onInput}
           @change=${this.onChange}
         />
