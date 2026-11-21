@@ -203,6 +203,18 @@ test.describe("dlaždice (CURRENT_SPEC.md, Ovládací prvky, Dlaždice)", () => 
     await expect(tile(page, "t-fan").locator(".chevron")).toHaveCount(0);
   });
 
+  test("hodnota v rohu dlaždice stojí před šipkou, nezalamuje se a nepřekrývá název", async ({ page }) => {
+    const corner = tile(page, "t-open").locator(".corner");
+    await expect(corner).toHaveText("☀ 12 400 lx");
+    await expect(tile(page, "t-fan").locator(".corner")).toHaveCount(0);
+    const c = (await corner.boundingBox())!;
+    const chevron = (await tile(page, "t-open").locator(".chevron").boundingBox())!;
+    const name = (await tile(page, "t-open").locator(".name > span:first-child").boundingBox())!;
+    expect(c.height).toBeLessThanOrEqual(21);
+    expect(c.x + c.width).toBeLessThanOrEqual(chevron.x);
+    expect(name.x + name.width).toBeLessThanOrEqual(c.x);
+  });
+
   test("předvolba: akce s počtem, chráněná jen dvojklepem; nechráněná hned; vypnutá nic", async ({ page }) => {
     await expect(tile(page, "t-preset").locator(".count")).toHaveText("3");
     await tile(page, "t-preset").click();

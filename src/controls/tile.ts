@@ -28,6 +28,11 @@ export class HdkTile extends LitElement {
   @property() text = "";
   @property({ reflect: true }) state: TileState = "idle";
   @property() kind: TileKind = "toggle";
+  /**
+   * A short value in the top right corner, before the chevron (the illuminance outside on the tile "Venku"): smaller and
+   * dimmed like the state, never wrapped; the name gives way and wraps beside it. Part of the spoken `label` of the card.
+   */
+  @property() corner = "";
   /** How many devices are in this choice; shown as a badge when set. */
   @property({ type: Number }) count?: number;
   /** One line with the name in the middle (a preset), without the state line. */
@@ -128,6 +133,15 @@ export class HdkTile extends LitElement {
         flex: 1;
         min-width: 0;
       }
+      .corner {
+        flex: none;
+        font-size: 13px;
+        line-height: 20px;
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        color: var(--hdk-secondary, #98989f);
+      }
       .chevron {
         flex: none;
         font-weight: 400;
@@ -140,6 +154,7 @@ export class HdkTile extends LitElement {
         color: var(--hdk-secondary, #98989f);
       }
       :host([state="on"]) .text,
+      :host([state="on"]) .corner,
       :host([state="on"]) .chevron {
         color: var(--hdk-tile-on-sub, #fff);
       }
@@ -242,7 +257,7 @@ export class HdkTile extends LitElement {
         @pointerleave=${this.release}
         @pointercancel=${this.release}
         @contextmenu=${(event: Event) => this.protected && event.preventDefault()}
-      ><span class="name"><span>${this.name}</span>${this.kind === "open" ? html`<span class="chevron" aria-hidden="true">›</span>` : null}</span>${this.centered
+      ><span class="name"><span>${this.name}</span>${this.corner && !this.centered ? html`<span class="corner">${this.corner}</span>` : null}${this.kind === "open" ? html`<span class="chevron" aria-hidden="true">›</span>` : null}</span>${this.centered
           ? count
           : html`<span class="text">${joinedText(this.text)}${count}</span>`}</button>
       <span class="sr" aria-live="polite">${this.hints.hint ? this.hint : ""}</span>
