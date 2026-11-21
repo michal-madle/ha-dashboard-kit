@@ -99,11 +99,14 @@ export class HdkSlider extends LitElement {
       background: #fff;
       box-shadow: 0 2px 6px rgb(0 0 0 / 40%);
     }
+    /* A painted bar has a thin outline, so its light end stays visible on the light capsule. */
     input.painted::-webkit-slider-runnable-track {
       background: var(--track);
+      box-shadow: inset 0 0 0 1px var(--hdk-track-outline, rgb(128 128 128 / 45%));
     }
     input.painted::-moz-range-track {
       background: var(--track);
+      box-shadow: inset 0 0 0 1px var(--hdk-track-outline, rgb(128 128 128 / 45%));
     }
     input.painted::-moz-range-progress {
       background: transparent;
