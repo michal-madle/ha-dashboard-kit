@@ -203,16 +203,31 @@ test.describe("dlaždice (CURRENT_SPEC.md, Ovládací prvky, Dlaždice)", () => 
     await expect(tile(page, "t-fan").locator(".chevron")).toHaveCount(0);
   });
 
-  test("hodnota v rohu dlaždice stojí před šipkou, nezalamuje se a nepřekrývá název", async ({ page }) => {
+  test("hodnota v pravém dolním rohu dlaždice: na posledním řádku stavu, je-li místo, jinak pod ním; nic nepřekrývá", async ({ page }) => {
     const corner = tile(page, "t-open").locator(".corner");
-    await expect(corner).toHaveText("☀ 12 400 lx");
+    await expect(corner).toHaveText("12 400 lx");
     await expect(tile(page, "t-fan").locator(".corner")).toHaveCount(0);
-    const c = (await corner.boundingBox())!;
-    const chevron = (await tile(page, "t-open").locator(".chevron").boundingBox())!;
-    const name = (await tile(page, "t-open").locator(".name > span:first-child").boundingBox())!;
-    expect(c.height).toBeLessThanOrEqual(21);
-    expect(c.x + c.width).toBeLessThanOrEqual(chevron.x);
-    expect(name.x + name.width).toBeLessThanOrEqual(c.x);
+    const box = async () => {
+      const button = (await tile(page, "t-open").locator("button").boundingBox())!;
+      const c = (await corner.boundingBox())!;
+      const text = (await tile(page, "t-open").locator(".joined").boundingBox())!;
+      return { button, c, text };
+    };
+    const columns = (value: string) => page.evaluate((v) => ((document.querySelector("#tiles") as HTMLElement).style.gridTemplateColumns = v), value);
+    // A wide tile with a short state: the same line, at the right edge of the tile.
+    await columns("1fr");
+    await page.waitForTimeout(50);
+    let { button, c, text } = await box();
+    expect(Math.abs(c.y - text.y)).toBeLessThan(2);
+    expect(c.x + c.width).toBeGreaterThan(button.x + button.width - 14);
+    expect(text.x + text.width).toBeLessThanOrEqual(c.x);
+    // A narrow tile whose state fills its line: the value goes under it, still right, inside the tile.
+    await columns("repeat(3, 1fr)");
+    await page.waitForTimeout(50);
+    ({ button, c, text } = await box());
+    expect(c.y).toBeGreaterThanOrEqual(text.y + text.height - 19);
+    expect(c.x + c.width).toBeLessThanOrEqual(button.x + button.width);
+    expect(c.y + c.height).toBeLessThanOrEqual(button.y + button.height);
   });
 
   test("předvolba: akce s počtem, chráněná jen dvojklepem; nechráněná hned; vypnutá nic", async ({ page }) => {
