@@ -64,6 +64,23 @@ export function pageLanguage(): Language {
   return languageOf(document.documentElement.lang || navigator.language || "");
 }
 
+/**
+ * How long something lasts, the same in all three languages (the unit symbols min, h, d are not translated): "< 1 min",
+ * "12 min", "1 h 5 min", "2 d 3 h"; two units at most, a zero second unit is left out (uživatel 21. 11. 2026: „Q370
+ * ano“, the format of Klima for every card).
+ */
+export function formatDuration(minutes: number): string {
+  const total = Math.max(0, Math.floor(Number.isFinite(minutes) ? minutes : 0));
+  if (total < 1) return "< 1 min";
+  if (total < 60) return `${total} min`;
+  if (total < 24 * 60) {
+    const [hours, rest] = [Math.floor(total / 60), total % 60];
+    return rest === 0 ? `${hours} h` : `${hours} h ${rest} min`;
+  }
+  const [days, hours] = [Math.floor(total / (24 * 60)), Math.floor((total % (24 * 60)) / 60)];
+  return hours === 0 ? `${days} d` : `${days} d ${hours} h`;
+}
+
 const caches = new WeakMap<object, Map<string, I18n<unknown>>>();
 
 const DEFAULT_LOCALE: Record<Language, string> = { cs: "cs-CZ", sv: "sv-SE", en: "en" };

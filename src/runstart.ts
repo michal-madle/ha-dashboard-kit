@@ -1,5 +1,9 @@
 import { entityState } from "./entities";
+import { historyRows, toMillis } from "./history";
+import type { RawHistory, RawHistoryRow } from "./history";
 import type { HomeAssistant } from "./types";
+
+export type { RawHistoryRow } from "./history";
 
 /*
  * Since when an entity has its current state, so that a restart of Home Assistant does not start a duration again
@@ -11,22 +15,6 @@ import type { HomeAssistant } from "./types";
 
 /** How far back the history is searched; a run that began earlier is shown from the beginning of this window. */
 export const RUN_LOOKBACK_MS = 7 * 24 * 3_600_000;
-
-type RawTime = number | string | null | undefined;
-
-/** One row of `history/history_during_period` with `minimal_response` (`s`, `lu`) or the full form. */
-export interface RawHistoryRow {
-  s?: string;
-  state?: string;
-  lu?: RawTime;
-  last_updated?: RawTime;
-}
-
-function toMillis(value: RawTime): number | undefined {
-  if (value === undefined || value === null) return undefined;
-  const time = typeof value === "number" ? (value < 1e11 ? value * 1000 : value) : Date.parse(value);
-  return Number.isFinite(time) ? time : undefined;
-}
 
 /**
  * The start of the last run of the same state in the rows (ms), and that state. Rows without a state or a time and
@@ -98,18 +86,9 @@ export class RunStarts {
     if (!hass || !asked.size) return;
     for (const [id, key] of asked) this.pending.set(id, key);
     const end = this.now();
-    let rows: Record<string, RawHistoryRow[]> | null | undefined;
+    let rows: RawHistory | undefined;
     try {
-      rows = await hass.callWS<Record<string, RawHistoryRow[]> | null>({
-        type: "history/history_during_period",
-        start_time: new Date(end - RUN_LOOKBACK_MS).toISOString(),
-        end_time: new Date(end).toISOString(),
-        entity_ids: [...asked.keys()],
-        include_start_time_state: true,
-        significant_changes_only: false,
-        minimal_response: true,
-        no_attributes: true,
-      });
+      rows = await historyRows(hass, [...asked.keys()], end - RUN_LOOKBACK_MS, end);
     } catch {
       rows = undefined;
     }

@@ -12,8 +12,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("registrace je idempotentní: dvojí defineControls nespadne a prvky jsou definované", async ({ page }) => {
-  const defined = await page.evaluate(() => ["kit-switch", "kit-segmented", "kit-slider", "kit-ring", "kit-tile", "kit-sheet"].map((name) => !!customElements.get(name)));
-  expect(defined).toEqual([true, true, true, true, true, true]);
+  const defined = await page.evaluate(() => ["kit-switch", "kit-segmented", "kit-slider", "kit-ring", "kit-tile", "kit-sheet", "kit-info"].map((name) => !!customElements.get(name)));
+  expect(defined).toEqual([true, true, true, true, true, true, true]);
 });
 
 test("nechráněný přepínač přepne jedním klepnutím", async ({ page }) => {
@@ -337,5 +337,38 @@ test.describe("list odspodu (CURRENT_SPEC.md, Ovládací prvky, List odspodu)", 
   test("axe bez porušení s otevřeným listem", async ({ page }) => {
     await open(page);
     expect(await axeViolations(page, ["page-has-heading-one", "region"])).toEqual([]);
+  });
+});
+
+test.describe("vysvětlivka ⓘ", () => {
+  test("klepnutí otevře bublinu nad kartou, druhé ji zavře; plocha 44 px; nic se neposune", async ({ page }) => {
+    const before = await page.locator("main").boundingBox();
+    const button = page.locator("#info button");
+    expect(await button.boundingBox()).toMatchObject({ width: 44, height: 44 });
+    await expect(button).toHaveAttribute("aria-expanded", "false");
+    await button.click();
+    await expect(page.locator("#info .note")).toHaveText("Křivka „možné“ je výkon při jasné obloze.");
+    await expect(page.locator("#info .note")).toHaveAttribute("role", "note");
+    await expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(await page.locator("main").boundingBox()).toEqual(before);
+    await button.click();
+    await expect(page.locator("#info .note")).toHaveCount(0);
+  });
+
+  test("klepnutí na bublinu nebo Escape ji zavře; otevřená je vždy jen jedna", async ({ page }) => {
+    await page.locator("#info button").click();
+    await page.locator("#info .note").click();
+    await expect(page.locator("#info .note")).toHaveCount(0);
+    await page.locator("#info button").click();
+    await page.locator("#info2 button").click();
+    await expect(page.locator("#info .note")).toHaveCount(0);
+    await expect(page.locator("#info2 .note")).toHaveCount(1);
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#info2 .note")).toHaveCount(0);
+  });
+
+  test("přístupnost: otevřená bublina bez porušení axe", async ({ page }) => {
+    await page.locator("#info button").click();
+    expect(await axeViolations(page)).toEqual([]);
   });
 });

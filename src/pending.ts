@@ -12,6 +12,8 @@ export interface PendingCommand {
   entities: string[];
   /** True when Home Assistant reports what was asked. */
   done: (hass: HomeAssistant) => boolean;
+  /** Its own stall time (ms), e.g. from the configuration of the card; otherwise the one of the `Pending`. */
+  stallMs?: number;
 }
 
 interface Watch extends PendingCommand {
@@ -76,7 +78,7 @@ export class Pending {
 
   private arm(key: string, watch: Watch): void {
     clearTimeout(watch.timer);
-    watch.timer = setTimeout(() => this.stop(key), this.stallMs);
+    watch.timer = setTimeout(() => this.stop(key), watch.stallMs ?? this.stallMs);
   }
 }
 

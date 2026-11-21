@@ -35,4 +35,13 @@ describe("odezva příkazu", () => {
     vi.advanceTimersByTime(1500);
     expect(pending.has("a")).toBe(false);
   });
+
+  it("vlastní doba příkazu (konfigurace karty) přebije dobu Pending", () => {
+    const pending = new Pending(() => undefined, 5000);
+    pending.start("a", hassOf({ "cover.a": cover("open", 100) }), { entities: ["cover.a"], done: () => false, stallMs: 8000 });
+    vi.advanceTimersByTime(6000);
+    expect(pending.has("a")).toBe(true);
+    vi.advanceTimersByTime(2000);
+    expect(pending.has("a")).toBe(false);
+  });
 });

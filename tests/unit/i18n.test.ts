@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardLanguage, getI18n, hassLanguage, languageOf } from "../../src/i18n";
+import { cardLanguage, formatDuration, getI18n, hassLanguage, languageOf } from "../../src/i18n";
 import type { Dictionaries } from "../../src/i18n";
 import type { HomeAssistant } from "../../src/types";
 
@@ -61,5 +61,19 @@ describe("texty a formáty", () => {
 
   it("neznámá značka jazyka profilu se nezřítí, ale vrátí angličtinu", () => {
     expect(getI18n(TEXTS, "en", hass({ language: "xx-invalid-tag" })).one(1.5)).toBe("1.5");
+  });
+});
+
+describe("doba", () => {
+  it("< 1 min, minuty, hodiny a minuty, dny a hodiny; nejvýš dvě jednotky, nulová druhá chybí (Q370)", () => {
+    expect(formatDuration(0)).toBe("< 1 min");
+    expect(formatDuration(0.9)).toBe("< 1 min");
+    expect(formatDuration(-5)).toBe("< 1 min");
+    expect(formatDuration(Number.NaN)).toBe("< 1 min");
+    expect(formatDuration(12)).toBe("12 min");
+    expect(formatDuration(60)).toBe("1 h");
+    expect(formatDuration(65)).toBe("1 h 5 min");
+    expect(formatDuration(24 * 60)).toBe("1 d");
+    expect(formatDuration(2 * 24 * 60 + 3 * 60 + 59)).toBe("2 d 3 h");
   });
 });
