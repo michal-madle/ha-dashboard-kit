@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-ha-dashboard-kit: společné stavební kameny karet Klima a Energie (knihovna, ne karta). Odpovídej česky.
+ha-dashboard-kit: společné stavební kameny karet Klima, Energie a Dům (knihovna, ne karta). Odpovídej česky.
 
 @../ha-config/AGENTS.md
 
